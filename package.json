@@ -1,0 +1,59 @@
+{
+  "name": "zeropass",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "ZeroPass — Confidential Credentials with Zero-Knowledge Proofs on the Midnight Network",
+  "author": "Samyak",
+  "license": "MIT",
+  "scripts": {
+    "compile": "export PATH=\"$HOME/.local/bin:$PATH\"; if ! command -v compact >/dev/null 2>&1; then curl --proto '=https' --tlsv1.2 -LsSf https://github.com/midnightntwrk/compact/releases/latest/download/compact-installer.sh | sh && export PATH=\"$HOME/.local/bin:$PATH\"; fi; if [ ! -d \"$HOME/.compact/versions/0.31.1\" ]; then compact update 0.31.1; fi; compact compile contracts/shadow-kyc.compact contracts/managed/shadow-kyc",
+    "compile:frontend": "npm run compile && rm -rf frontend/public/keys frontend/public/zkir && mkdir -p frontend/public/keys frontend/public/zkir && cp -r contracts/managed/shadow-kyc/keys/* frontend/public/keys/ && cp -r contracts/managed/shadow-kyc/zkir/* frontend/public/zkir/",
+    "build": "npx tsc --noEmit",
+    "setup": "npx tsx src/setup.ts",
+    "deploy": "npx tsx src/deploy.ts",
+    "cli": "npx tsx src/cli.ts",
+    "check-balance": "npx tsx src/check-balance.ts",
+    "network": "npx tsx src/network.ts",
+    "proof-server:start": "docker compose up -d",
+    "proof-server:stop": "docker compose down",
+    "clean": "rm -rf contracts/managed .midnight-state.json .midnight-wallet-state",
+    "api": "npx tsx src/api-server.ts",
+    "api:kill": "bash -c 'lsof -ti :8080 | xargs kill -9 2>/dev/null; echo Port 8080 freed'",
+    "api:fresh": "bash -c 'lsof -ti :8080 | xargs kill -9 2>/dev/null; sleep 0.5; npx tsx src/api-server.ts'",
+    "api:start": "npx tsx src/api-server.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "tsx scripts/e2e-check.ts",
+    "frontend:dev": "npm run api:fresh & npm --prefix frontend run dev",
+    "frontend:build": "npm --prefix frontend run build"
+  },
+  "dependencies": {
+    "@midnight-ntwrk/compact-runtime": "0.16.0",
+    "@midnight-ntwrk/midnight-js-contracts": "4.1.1",
+    "@midnight-ntwrk/midnight-js-http-client-proof-provider": "4.1.1",
+    "@midnight-ntwrk/midnight-js-indexer-public-data-provider": "4.1.1",
+    "@midnight-ntwrk/midnight-js-level-private-state-provider": "4.1.1",
+    "@midnight-ntwrk/midnight-js-network-id": "4.1.1",
+    "@midnight-ntwrk/midnight-js-node-zk-config-provider": "4.1.1",
+    "@midnight-ntwrk/midnight-js-protocol": "4.1.1",
+    "@midnight-ntwrk/midnight-js-types": "4.1.1",
+    "@midnight-ntwrk/midnight-js-utils": "4.1.1",
+    "@midnight-ntwrk/wallet-sdk": "1.2.0",
+    "rxjs": "^7.8.2",
+    "ws": "^8.21.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/ws": "^8.18.1",
+    "tsx": "^4.23.1",
+    "typescript": "^6.0.3",
+    "vitest": "^3.2.4"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "overrides": {
+    "@midnight-ntwrk/onchain-runtime-v3": "3.0.0"
+  },
+  "keywords": ["midnight", "blockchain", "zero-knowledge", "privacy", "kyc", "credentials", "zeropass"]
+}
