@@ -1,0 +1,337 @@
+﻿/**
+ * CLI for interacting with risein contract
+ */
+import { createInterface } from 'node:readline/promises';
+import { stdin, stdout } from 'node:process';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { WebSocket } from 'ws';
+import { Buffer } from 'buffer';
+
+// Midnight SDK imports
+import { findDeployedContract } from '@midnight-ntwrk/midnight-js-contracts';
+import { httpClientProofProvider } from '@midnight-ntwrk/midnight-js-http-client-proof-provider';
+import { indexerPublicDataProvider } from '@midnight-ntwrk/midnight-js-indexer-public-data-provider';
+import { levelPrivateStateProvider } from '@midnight-ntwrk/midnight-js-level-private-state-provider';
+import { NodeZkConfigProvider } from '@midnight-ntwrk/midnight-js-node-zk-config-provider';
+import { resolveNetwork, getOrCreateSeed, getDeployment } from './network';
+import { createWallet, persistWalletState, unshieldedToken, type WalletContext } from './wallet';
+import { CompiledContract } from '@midnight-ntwrk/midnight-js-protocol/compact-js';
+import { StateValue } from '@midnight-ntwrk/compact-runtime';
+
+// Enable WebSocket for GraphQL subscriptions
+// @ts-expect-error Required for wallet sync
+globalThis.WebSocket = WebSocket;
+
+// Must match the privateStateId used at deploy time so the CLI reconnects to
+// the same private state. The ZeroPass contract has a localSecret witness.
+const PRIVATE_STATE_ID = 'shadowKycPrivateState';
+
+const { network, config: networkConfig } = resolveNetwork();
+const SEED = getOrCreateSeed(network);
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const zkConfigPath = path.resolve(__dirname, '..', 'contracts', 'managed', 'ZeroPass');
+
+// Load compiled contract
+const contractPath = path.join(zkConfigPath, 'contract', 'index.js');
+
+// Check if contract is compiled
+if (!fs.existsSync(contractPath)) {
+  console.error('\nâŒ Contract not compiled! Run: npm run compile\n');
+  process.exit(1);
+}
+
+import type * as ShadowKycTypes from '../contracts/managed/ZeroPass/contract/index.js';
+
+const ShadowKyc = await import(pathToFileURL(contractPath).href);
+
+const compiledContract = CompiledContract.make<ShadowKycTypes.Contract<unknown>>(
+  'ZeroPass',
+  ShadowKyc.Contract,
+).pipe(
+  CompiledContract.withWitnesses({
+    localSecret: (context) => {
+      const secret = new Uint8Array(Buffer.from(SEED, 'hex'));
+      return [context.privateState, secret];
+    },
+  }),
+  CompiledContract.withCompiledFileAssets(zkConfigPath),
+);
+
+// â”€â”€â”€ Providers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+async function createProviders(walletCtx: WalletContext) {
+  // The SDK requires the private-state password to be at least 16 characters.
+  // The default below is a placeholder for local devnet only â€” set a strong
+  // password via PRIVATE_STATE_PASSWORD when you move to a non-local target.
+  const privateStatePassword = process.env.PRIVATE_STATE_PASSWORD?.trim() || 'Local-Devnet-Development-Placeholder-1';
+
+  const walletProvider = {
+    // In Midnight.js 4.1.x the WalletProvider interface returns the key objects
+    // (CoinPublicKey / EncPublicKey) directly â€” no longer hex strings.
+    getCoinPublicKey: () => walletCtx.shieldedSecretKeys.coinPublicKey,
+    getEncryptionPublicKey: () => walletCtx.shieldedSecretKeys.encryptionPublicKey,
+    async balanceTx(tx: any, ttl?: Date) {
+      // balanceUnboundTransaction -> finalizeRecipe is the complete balancing
+      // path in wallet-sdk 1.x; the earlier explicit signRecipe step is gone.
+      const recipe = await walletCtx.wallet.balanceUnboundTransaction(
+        tx,
+        { shieldedSecretKeys: walletCtx.shieldedSecretKeys, dustSecretKey: walletCtx.dustSecretKey },
+        { ttl: ttl ?? new Date(Date.now() + 30 * 60 * 1000) },
+      );
+      return walletCtx.wallet.finalizeRecipe(recipe);
+    },
+    submitTx: (tx: any) => walletCtx.wallet.submitTransaction(tx) as any,
+  };
+
+  const zkConfigProvider = new NodeZkConfigProvider(zkConfigPath);
+  const accountId = walletCtx.unshieldedKeystore.getBech32Address().toString();
+
+  const basePrivateStateProvider = levelPrivateStateProvider({
+    privateStateStoreName: 'ZeroPass-state',
+    accountId,
+    privateStoragePasswordProvider: () => privateStatePassword,
+  });
+
+  const privateStateProvider = {
+    ...basePrivateStateProvider,
+    get: async () => StateValue.newNull(),
+    set: async () => {},
+  };
+
+  return {
+    privateStateProvider: privateStateProvider as any,
+    publicDataProvider: indexerPublicDataProvider(networkConfig.indexer, networkConfig.indexerWS),
+    zkConfigProvider,
+    proofProvider: httpClientProofProvider(networkConfig.proofServer, zkConfigProvider),
+    walletProvider,
+    midnightProvider: walletProvider,
+  };
+}
+
+// â”€â”€â”€ Main CLI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+async function main() {
+  console.log('\nâ•”â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•—');
+  console.log('â•‘                   risein CLI                           â•‘');
+  console.log('â•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•\n');
+
+  const rl = createInterface({ input: stdin, output: stdout });
+
+  // Check for deployment
+  const deployment = getDeployment(network);
+  if (!deployment) {
+    console.error(`No deploy on file for network ${network}. Run \`npm run setup -- --network ${network}\` first.`);
+    process.exit(1);
+  }
+  console.log(`  Contract: ${deployment.address}`);
+  console.log(`  Network: ${network}\n`);
+
+  try {
+    const seed = SEED;
+
+    console.log('  Connecting to wallet...');
+    const walletCtx = await createWallet({ network, networkConfig, seed });
+    const restoredCount = Object.values(walletCtx.restored).filter(Boolean).length;
+    if (restoredCount > 0) {
+      console.log(`  Restored ${restoredCount}/3 child wallets from .midnight-wallet-state â€” sync will resume from saved point.`);
+    }
+
+    console.log('  Syncing with network...');
+    console.log('  â„¹  This may take several minutes depending on network size.');
+    console.log('     RPC disconnection messages during sync are normal and can be safely ignored.\n');
+    const syncStart = Date.now();
+
+    const sub = walletCtx.wallet.state().subscribe((state) => {
+      const elapsed = Math.round((Date.now() - syncStart) / 1000);
+      
+      const shieldedApplied = state.shielded.progress.appliedIndex;
+      const shieldedTip = state.shielded.progress.highestRelevantWalletIndex;
+      const shieldedPct = shieldedTip > 0n ? ((Number(shieldedApplied) / Number(shieldedTip)) * 100).toFixed(1) : '0.0';
+      
+      const dustApplied = state.dust.progress.appliedIndex;
+      const dustTip = state.dust.progress.highestRelevantWalletIndex;
+      const dustPct = dustTip > 0n ? ((Number(dustApplied) / Number(dustTip)) * 100).toFixed(1) : '0.0';
+
+      const unshieldedSynced = state.unshielded.progress.isStrictlyComplete() ? 'Synced' : 'Syncing';
+      
+      process.stdout.write(
+        `\r  â³ Syncing... [Shielded: ${shieldedPct}% (${shieldedApplied}/${shieldedTip})] [Dust: ${dustPct}% (${dustApplied}/${dustTip})] [Unshielded: ${unshieldedSynced}] (${elapsed}s elapsed)   `
+      );
+    });
+
+    const SYNC_TIMEOUT_MS = 1_800_000; // 30 minutes
+    let state;
+    try {
+      const syncPromise = walletCtx.wallet.waitForSyncedState();
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error(`Sync timed out after ${SYNC_TIMEOUT_MS / 60000} minutes.`)), SYNC_TIMEOUT_MS)
+      );
+      state = await Promise.race([syncPromise, timeoutPromise]) as any;
+    } catch (err: any) {
+      sub.unsubscribe();
+      console.error(`\nâŒ Sync error: ${err.message}`);
+      await walletCtx.wallet.stop();
+      process.exit(1);
+    }
+
+    sub.unsubscribe();
+    process.stdout.write('\r  âœ“ Synced with network.                                      \n');
+
+    // Persist sync state so the next run doesn't have to redo this work.
+    await persistWalletState(network, walletCtx);
+    const balance = state.unshielded.balances[unshieldedToken().raw] ?? 0n;
+    console.log(`  Balance: ${balance.toLocaleString()} tNight\n`);
+
+    // Surface a faucet hint when a public-network wallet has 0 tNIGHT.
+    // Reads (option 2) work without funds, but writes (option 1) need DUST
+    // generated from registered NIGHT â€” without this hint the next failure
+    // mode is a confusing "Insufficient Funds" deep inside the tx builder.
+    if (balance === 0n && network !== 'undeployed' && networkConfig.faucet) {
+      const address = walletCtx.unshieldedKeystore.getBech32Address();
+      console.log('  âš  Wallet has no tNight. Fund it from the faucet to send transactions:');
+      console.log(`     ${networkConfig.faucet}`);
+      console.log(`     Wallet address: ${address}\n`);
+    }
+
+    // Setup providers and connect to contract
+    console.log('  Connecting to contract...');
+    const providers = await createProviders(walletCtx);
+
+    const deployed: any = await findDeployedContract(providers, {
+      compiledContract: compiledContract as any,
+      contractAddress: deployment.address,
+      privateStateId: PRIVATE_STATE_ID,
+      initialPrivateState: StateValue.newNull(),
+    });
+
+    console.log('  âœ… Connected!\n');
+
+    // Interactive CLI loop
+    let running = true;
+    while (running) {
+      console.log('â”€â”€â”€ Menu â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€');
+      console.log('  1. Issue credential (request KYC/AML)');
+      console.log('  2. Approve credential (authority)');
+      console.log('  3. Prove eligibility (ZK proof, private)');
+      console.log('  4. Revoke credential (authority)');
+      console.log('  5. Read contract state');
+      console.log('  6. Check wallet balance');
+      console.log('  7. Exit\n');
+
+      const choice = await rl.question('  Your choice: ');
+
+      switch (choice.trim()) {
+        case '1': {
+          console.log('\n  Submitting credential request (this may take 30-60 seconds)...');
+          console.log('  ðŸ”’ Your identity is hashed into a commitment â€” never revealed.');
+          try {
+            const tx = await deployed.callTx.issueCredential();
+            console.log(`\n  âœ… Credential request submitted!`);
+            console.log(`  Transaction ID: ${tx.public.txId}`);
+            console.log(`  Block height: ${tx.public.blockHeight}\n`);
+          } catch (error) {
+            console.error('\n  âŒ Failed:', error instanceof Error ? error.message : error);
+          }
+          break;
+        }
+
+        case '2': {
+          const commitment = await rl.question('  Enter credential commitment (hex): ');
+          console.log('\n  Submitting approval (this may take 30-60 seconds)...');
+          try {
+            const commitmentBytes = Buffer.from(commitment, 'hex');
+            const tx = await deployed.callTx.approveCredential(commitmentBytes);
+            console.log(`\n  âœ… Credential approved!`);
+            console.log(`  Transaction ID: ${tx.public.txId}`);
+            console.log(`  Block height: ${tx.public.blockHeight}\n`);
+          } catch (error) {
+            console.error('\n  âŒ Failed:', error instanceof Error ? error.message : error);
+          }
+          break;
+        }
+
+        case '3': {
+          const commitment = await rl.question('  Enter your credential commitment (hex): ');
+          console.log('\n  Generating ZK proof (this may take 30-60 seconds)...');
+          console.log('  ðŸ”’ Proved without revealing your input â€” your identity stays private.');
+          try {
+            const commitmentBytes = Buffer.from(commitment, 'hex');
+            const tx = await deployed.callTx.proveEligibility(commitmentBytes);
+            console.log(`\n  âœ… Eligibility proven!`);
+            console.log(`  Transaction ID: ${tx.public.txId}`);
+            console.log(`  Block height: ${tx.public.blockHeight}\n`);
+          } catch (error) {
+            console.error('\n  âŒ Failed:', error instanceof Error ? error.message : error);
+          }
+          break;
+        }
+
+        case '4': {
+          const commitment = await rl.question('  Enter credential commitment to revoke (hex): ');
+          console.log('\n  Submitting revocation (this may take 30-60 seconds)...');
+          try {
+            const commitmentBytes = Buffer.from(commitment, 'hex');
+            const tx = await deployed.callTx.revokeCredential(commitmentBytes);
+            console.log(`\n  âœ… Credential revoked!`);
+            console.log(`  Transaction ID: ${tx.public.txId}`);
+            console.log(`  Block height: ${tx.public.blockHeight}\n`);
+          } catch (error) {
+            console.error('\n  âŒ Failed:', error instanceof Error ? error.message : error);
+          }
+          break;
+        }
+
+        case '5': {
+          console.log('\n  Reading contract state from blockchain...');
+          try {
+            const contractState = await providers.publicDataProvider.queryContractState(deployment.address);
+            if (contractState) {
+              const ledgerState = ShadowKyc.ledger(contractState.data);
+              const authorityName = Buffer.from(ledgerState.authorityName).toString();
+              console.log(`\n  ðŸ“‹ Authority: ${authorityName}`);
+              console.log(`  ðŸ“‹ Pending credentials: ${ledgerState.pendingCredentials.size()}`);
+              console.log(`  ðŸ“‹ Approved credentials: ${ledgerState.credentials.size()}`);
+              console.log(`  ðŸ“‹ Revoked credentials: ${ledgerState.revokedCredentials.size()}`);
+              console.log(`  ðŸ“‹ Eligibility proofs: ${ledgerState.eligibilityCount}\n`);
+            } else {
+              console.log('\n  ðŸ“‹ No contract state found\n');
+            }
+          } catch (error) {
+            console.error('\n  âŒ Failed:', error instanceof Error ? error.message : error);
+          }
+          break;
+        }
+
+        case '6': {
+          console.log('\n  Checking balance...');
+          const currentState = await walletCtx.wallet.waitForSyncedState();
+          const currentBalance = currentState.unshielded.balances[unshieldedToken().raw] ?? 0n;
+          const dustBalance = currentState.dust.balance(new Date());
+          console.log(`\n  tNight: ${currentBalance.toLocaleString()}`);
+          console.log(`  DUST: ${dustBalance.toLocaleString()}\n`);
+          break;
+        }
+
+        case '7':
+          running = false;
+          console.log('\n  ðŸ‘‹ Goodbye!\n');
+          break;
+
+        default:
+          console.log('\n  âŒ Invalid choice. Please enter 1-7.\n');
+      }
+    }
+
+    await persistWalletState(network, walletCtx);
+    await walletCtx.wallet.stop();
+  } catch (error) {
+    console.error('\nâŒ Error:', error instanceof Error ? error.message : error);
+  } finally {
+    rl.close();
+  }
+}
+
+main().catch(console.error);
