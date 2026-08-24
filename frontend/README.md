@@ -1,6 +1,6 @@
-# Shadow-KYC Frontend
+# ZeroPass Frontend
 
-React + TypeScript + Vite frontend for the Shadow-KYC / ZK-AML system on the
+React + TypeScript + Vite frontend for ZeroPass — Confidential Credentials on the
 Midnight Network.
 
 ## Architecture
