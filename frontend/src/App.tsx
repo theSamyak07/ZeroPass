@@ -2,8 +2,8 @@ import { useCallback, useEffect, useMemo, useState, useRef } from 'react'
 import { Buffer } from 'buffer'
 import { findDeployedContract, type FoundContract } from '@midnight-ntwrk/midnight-js-contracts'
 import { CompiledContract } from '@midnight-ntwrk/midnight-js-protocol/compact-js'
-import * as ShadowKyc from '../../contracts/managed/shadow-kyc/contract/index.js'
-import type { Contract as ShadowKycContract } from '../../contracts/managed/shadow-kyc/contract/index.js'
+import * as ShadowKyc from '../../contracts/managed/ZeroPass/contract/index.js'
+import type { Contract as ShadowKycContract } from '../../contracts/managed/ZeroPass/contract/index.js'
 import type { InitialAPI, ConnectedAPI } from '@midnight-ntwrk/dapp-connector-api'
 import { initializeClientProviders, type ShadowKycPrivateState } from './providers'
 
@@ -104,7 +104,7 @@ async function joinContract(
 
   // Re-create the CompiledContract structure with client witnesses
   const compiledContract = CompiledContract.make<ShadowKycContract<ShadowKycPrivateState>>(
-    'shadow-kyc',
+    'ZeroPass',
     ShadowKyc.Contract
   ).pipe(
     CompiledContract.withWitnesses({

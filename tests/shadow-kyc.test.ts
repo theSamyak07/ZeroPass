@@ -8,7 +8,7 @@ import {
 } from '@midnight-ntwrk/compact-runtime';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const zkConfigPath = path.resolve(__dirname, '..', 'contracts', 'managed', 'shadow-kyc');
+const zkConfigPath = path.resolve(__dirname, '..', 'contracts', 'managed', 'ZeroPass');
 const contractPath = path.join(zkConfigPath, 'contract', 'index.js');
 
 // Load the compiled contract

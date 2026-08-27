@@ -68,7 +68,7 @@ async function waitForProofServer(maxAttempts = 60, delayMs = 2000): Promise<boo
 // â”€â”€â”€ Compiled contract loading â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const zkConfigPath = path.resolve(__dirname, '..', 'contracts', 'managed', 'shadow-kyc');
+const zkConfigPath = path.resolve(__dirname, '..', 'contracts', 'managed', 'ZeroPass');
 const contractPath = path.join(zkConfigPath, 'contract', 'index.js');
 
 if (!fs.existsSync(contractPath)) {
@@ -77,12 +77,12 @@ if (!fs.existsSync(contractPath)) {
 }
 
 import { Buffer } from 'buffer';
-import type * as ShadowKycTypes from '../contracts/managed/shadow-kyc/contract/index.js';
+import type * as ShadowKycTypes from '../contracts/managed/ZeroPass/contract/index.js';
 
 const ShadowKyc = await import(pathToFileURL(contractPath).href);
 
 const compiledContract = CompiledContract.make<ShadowKycTypes.Contract<unknown>>(
-  'shadow-kyc',
+  'ZeroPass',
   ShadowKyc.Contract,
 ).pipe(
   CompiledContract.withWitnesses({

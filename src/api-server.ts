@@ -44,7 +44,7 @@ const PORT = Number(process.env.PORT) || 8080;
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FRONTEND_DIST = path.resolve(__dirname, '..', 'frontend', 'dist');
-const zkConfigPath = path.resolve(__dirname, '..', 'contracts', 'managed', 'shadow-kyc');
+const zkConfigPath = path.resolve(__dirname, '..', 'contracts', 'managed', 'ZeroPass');
 const contractPath = path.join(zkConfigPath, 'contract', 'index.js');
 
 if (!fs.existsSync(contractPath)) {
@@ -52,7 +52,7 @@ if (!fs.existsSync(contractPath)) {
   process.exit(1);
 }
 
-import type * as ShadowKycTypes from '../contracts/managed/shadow-kyc/contract/index.js';
+import type * as ShadowKycTypes from '../contracts/managed/ZeroPass/contract/index.js';
 
 const ShadowKyc = await import(pathToFileURL(contractPath).href);
 
@@ -60,7 +60,7 @@ const { network, config: networkConfig } = resolveNetwork();
 const SEED = getOrCreateSeed(network);
 
 const compiledContract = CompiledContract.make<ShadowKycTypes.Contract<unknown>>(
-  'shadow-kyc',
+  'ZeroPass',
   ShadowKyc.Contract,
 ).pipe(
   CompiledContract.withWitnesses({
