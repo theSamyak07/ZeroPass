@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useMemo, useState, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useState, useRef } from 'react'
 import { Buffer } from 'buffer'
 import { findDeployedContract, type FoundContract } from '@midnight-ntwrk/midnight-js-contracts'
 import { CompiledContract } from '@midnight-ntwrk/midnight-js-protocol/compact-js'
@@ -248,7 +248,8 @@ function App() {
     }
 
     // Accept any Midnight-compatible wallet (Lace, 1AM, etc.)
-    // No wallet filtering â€” all wallets in window.midnight are valid
+    // No wallet filtering — all wallets in window.midnight are valid
+    const initialWalletObj = window.midnight[walletId];
 
     // For auto-connect only: if we already have an active verified connection, keep it
     if (isAutoConnect && globalConnectedAPI && globalConnectedWallet && globalConnectedWallet.id === walletId) {
@@ -713,8 +714,7 @@ function App() {
         console.log('[TX] contract call created. Executing issueCredential circuit...');
         setTxProgress((prev: any) => prev ? { ...prev, step: 'proving', message: 'Generating local ZK proof...' } : null);
         
-        // Execute the circuit client-side (this triggers ZK proof, balancing, signing and submission)
-        const tx = await deployedContract.callTx.issueCredential();
+        const tx = await (deployedContract.callTx as any).issueCredential();
         
         console.log('[TX] proof completed');
         console.log('[TX] transaction object created');
@@ -811,7 +811,7 @@ function App() {
 
           // Convert hex commitment to Bytes<32>
           const commitmentBytes = new Uint8Array(Buffer.from(commitment, 'hex'));
-          const tx = await deployedContract.callTx.proveEligibility(commitmentBytes);
+          const tx = await (deployedContract.callTx as any).proveEligibility(commitmentBytes);
 
           console.log('[TX] proof completed');
           console.log('[TX] transaction object created');
@@ -865,7 +865,7 @@ function App() {
         setTxProgress((prev: any) => prev ? { ...prev, step: 'proving', message: 'Generating local ZK proof...' } : null);
 
         const commitmentBytes = new Uint8Array(Buffer.from(c, 'hex'));
-        const tx = await deployedContract.callTx.proveEligibility(commitmentBytes);
+        const tx = await (deployedContract.callTx as any).proveEligibility(commitmentBytes);
 
         setTxProgress((prev: any) => prev ? { ...prev, step: 'signing', message: 'Submitting transaction via Lace Wallet...', txId: tx.public.txId, blockHeight: tx.public.blockHeight } : null);
 
@@ -933,6 +933,14 @@ function App() {
               >
                 {connectedWallet.name}: {shortHex(connectedWallet.address, 5, 4)}
               </span>
+              <button 
+                className="btn btn-secondary btn-small" 
+                onClick={handleFaucetRequest}
+                disabled={isRequestingFaucet}
+                title="Request tNIGHT from test faucet"
+              >
+                {isRequestingFaucet ? 'Funding...' : 'Faucet'}
+              </button>
               <button className="btn btn-secondary btn-small" onClick={disconnectWallet}>Disconnect</button>
             </>
           ) : (
