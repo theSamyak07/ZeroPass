@@ -26,12 +26,12 @@ import type {
 } from './types'
 import './App.css'
 
-// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Small helpers Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+//  Small helpers 
 
 function shortHex(hex: string, head = 10, tail = 8): string {
-  if (!hex) return 'Ã¢â‚¬â€'
+  if (!hex) return ''
   if (hex.length <= head + tail) return hex
-  return `${hex.slice(0, head)}Ã¢â‚¬Â¦${hex.slice(-tail)}`
+  return `${hex.slice(0, head)}...${hex.slice(-tail)}`
 }
 
 function formatCount(value: string): string {
@@ -39,7 +39,7 @@ function formatCount(value: string): string {
 }
 
 function formatNetworkName(net?: string): string {
-  if (!net) return 'Ã¢â‚¬â€'
+  if (!net) return ''
   if (net === 'undeployed') return 'Local Dev Network'
   if (net === 'preview') return 'Preview Testnet'
   if (net === 'preprod') return 'Preprod Testnet'
@@ -79,7 +79,7 @@ async function simulateCommitment(secret: string): Promise<string> {
   return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
 }
 
-// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Toast notification state Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+//  Toast notification state 
 
 interface Toast {
   kind: 'success' | 'error' | 'info'
@@ -149,7 +149,7 @@ async function validateConnectedAPI(api: ConnectedAPI): Promise<boolean> {
   }
 }
 
-// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Main Component Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+//  Main Component 
 
 function App() {
   const [status, setStatus] = useState<ServerStatus | null>(null)
@@ -895,7 +895,7 @@ function App() {
     return (
       <div className="app-loading">
         <div className="spinner" />
-        <p>Connecting to ZeroPass Smart Contract on Midnight Networkâ€¦</p>
+        <p>Connecting to ZeroPass Smart Contract on Midnight Network...</p>
       </div>
     )
   }
@@ -905,7 +905,7 @@ function App() {
       <header className="app-header">
         {/* Left: Brand */}
         <div className="brand">
-          <div className="brand-mark">ðŸ›¡ï¸</div>
+          <div className="brand-mark">🛡️</div>
           <h1>ZeroPass</h1>
         </div>
 
@@ -920,11 +920,11 @@ function App() {
         {/* Right: Status + Wallet */}
         <div className="header-meta">
           <span className={`pill ${status ? 'pill-ok' : 'pill-err'}`}>
-            <span>â—</span>{status ? formatNetworkName(status.network) : 'Offline'}
+            <span>●</span>{status ? formatNetworkName(status.network) : 'Offline'}
           </span>
           {connectedWallet ? (
             <>
-              {contractInitFailed && <span className="pill pill-err">âš  Contract Failed</span>}
+              {contractInitFailed && <span className="pill pill-err">⚠️ Contract Failed</span>}
               <span
                 className="pill pill-neutral"
                 style={{ cursor: 'pointer', borderColor: 'var(--emerald-border)', color: 'var(--emerald)' }}
@@ -1051,7 +1051,7 @@ function App() {
         </p>
       </footer>
 
-      {/* Ã¢â€â‚¬Ã¢â€â‚¬ Wallet Selector Modal Ã¢â€â‚¬Ã¢â€â‚¬ */}
+      {/*  Wallet Selector Modal  */}
       {/* Wallet Selector Modal */}
       {showWalletModal && (
         <div className="wallet-modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowWalletModal(false); }}>
@@ -1109,15 +1109,15 @@ function App() {
         </div>
       )}
 
-      {/* Ã¢â€â‚¬Ã¢â€â‚¬ Wallet Connection Pop-up Message Modal Ã¢â€â‚¬Ã¢â€â‚¬ */}
+      {/*  Wallet Connection Pop-up Message Modal  */}
       {showWalletSuccessPop && (
         <div className="tx-modal-overlay">
           <div className="wallet-pop-card">
             <div className="wallet-pop-header">
-              <div className="wallet-pop-icon">Ã°Å¸â€™Â³</div>
+              <div className="wallet-pop-icon">💳</div>
               <div>
                 <h3>Wallet Connected!</h3>
-                <p>Ã¢â€”Â Ready for Zero-Knowledge Transactions</p>
+                <p>● Ready for Zero-Knowledge Transactions</p>
               </div>
             </div>
             <div className="wallet-pop-details">
@@ -1136,7 +1136,7 @@ function App() {
                   style={{ cursor: 'pointer', color: 'var(--accent-light)' }}
                   onClick={() => copyToClipboard(showWalletSuccessPop.address, 'Wallet Address')}
                 >
-                  {shortHex(showWalletSuccessPop.address, 10, 8)} Ã°Å¸â€œâ€¹
+                  {shortHex(showWalletSuccessPop.address, 10, 8)} 📋
                 </span>
               </div>
               <div className="wallet-pop-row">
@@ -1156,23 +1156,23 @@ function App() {
             </div>
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
               <button className="btn btn-primary" onClick={() => setShowWalletSuccessPop(null)}>
-                Ã¢Å“â€œ Continue to DApp
+                ✓ Continue to DApp
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Ã¢â€â‚¬Ã¢â€â‚¬ Transaction & ZK Proof Processing Pop-up Modal Ã¢â€â‚¬Ã¢â€â‚¬ */}
+      {/*  Transaction & ZK Proof Processing Pop-up Modal  */}
       {txProgress && txProgress.open && (
         <div className="tx-modal-overlay">
           <div className="tx-modal-card">
             <div className="tx-modal-title-row">
               <h3>
-                <span>Ã¢Å¡Â¡</span> {txProgress.title}
+                <span>⚡</span> {txProgress.title}
               </h3>
               {txProgress.step === 'done' || txProgress.step === 'error' ? (
-                <button className="close-btn" onClick={() => setTxProgress(null)}>Ã¢Å“â€¢</button>
+                <button className="close-btn" onClick={() => setTxProgress(null)}>✕</button>
               ) : null}
             </div>
 
@@ -1237,13 +1237,13 @@ function App() {
             {txProgress.step === 'done' && (
               <div className="wallet-pop-details" style={{ borderColor: 'var(--emerald-border)', background: 'rgba(16, 185, 129, 0.08)' }}>
                 <p style={{ margin: 0, fontWeight: 600, color: 'var(--emerald)', fontSize: 14 }}>
-                  Ã¢Å“â€œ Transaction Confirmed on Midnight Ledger!
+                  ✓ Transaction Confirmed on Midnight Ledger!
                 </p>
                 {txProgress.txId && (
                   <div className="wallet-pop-row" style={{ marginTop: 8 }}>
                     <span className="wallet-pop-label">Tx ID:</span>
                     <span className="mono" style={{ cursor: 'pointer', color: 'var(--accent-light)' }} onClick={() => copyToClipboard(txProgress.txId!, 'Tx ID')}>
-                      {shortHex(txProgress.txId, 10, 8)} Ã°Å¸â€œâ€¹
+                      {shortHex(txProgress.txId, 10, 8)} 📋
                     </span>
                   </div>
                 )}
@@ -1257,7 +1257,7 @@ function App() {
                   <div className="wallet-pop-row">
                     <span className="wallet-pop-label">Commitment:</span>
                     <span className="mono" style={{ cursor: 'pointer', color: 'var(--accent-light)' }} onClick={() => copyToClipboard(txProgress.commitment!, 'Commitment')}>
-                      {shortHex(txProgress.commitment, 10, 8)} Ã°Å¸â€œâ€¹
+                      {shortHex(txProgress.commitment, 10, 8)} 📋
                     </span>
                   </div>
                 )}
@@ -1280,7 +1280,7 @@ function App() {
                   background: isWarning ? 'rgba(245, 158, 11, 0.08)' : 'rgba(244, 63, 94, 0.08)'
                 }}>
                   <p style={{ margin: 0, fontWeight: 600, color: isWarning ? '#f59e0b' : 'var(--rose)', fontSize: 14 }}>
-                    {isWarning ? 'Ã¢Å¡Â Ã¯Â¸Â' : 'Ã¢ÂÅ’'} {isWarning ? '' : 'Transaction Error: '}{txProgress.error}
+                    {isWarning ? ' ' : ''} {isWarning ? '' : 'Transaction Error: '}{txProgress.error}
                   </p>
                 </div>
               )
@@ -1294,7 +1294,7 @@ function App() {
               ) : (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: 'var(--accent-light)' }}>
                   <span className="spinner" style={{ width: 16, height: 16, borderWidth: 2 }} />
-                  <span>Processing ZK TransactionÃ¢â‚¬Â¦</span>
+                  <span>Processing ZK Transaction...</span>
                 </div>
               )}
             </div>
@@ -1305,7 +1305,7 @@ function App() {
   )
 }
 
-// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Overview Tab Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+//  Overview Tab 
 
 function Overview({
   status,
@@ -1372,7 +1372,7 @@ function Overview({
         </div>
 
         <div className="privacy-note">
-          <span className="privacy-icon">Ã¢Å¡Â¡</span>
+          <span className="privacy-icon">⚡</span>
           <p>
             <strong>Interactive Privacy Visualizer:</strong> See how your local identity secret maps to a 32-byte on-chain commitment below.
           </p>
@@ -1420,7 +1420,7 @@ function Overview({
               onClick={() => onCopy(simHash, 'Simulated Commitment')}
               title="Copy Commitment"
             >
-              Ã°Å¸â€œâ€¹
+              📋
             </button>
           </div>
         </div>
@@ -1431,7 +1431,7 @@ function Overview({
         <dl className="stat-grid">
           <div>
             <dt>Authority Name</dt>
-            <dd>{state?.authorityName ?? 'Ã¢â‚¬â€'}</dd>
+            <dd>{state?.authorityName ?? ''}</dd>
           </div>
           <div>
             <dt>Active Network</dt>
@@ -1446,22 +1446,22 @@ function Overview({
                   onClick={() => onCopy(status.contractAddress, 'Contract Address')}
                   title="Click to copy"
                 >
-                  {shortHex(status.contractAddress, 16, 12)} Ã°Å¸â€œâ€¹
+                  {shortHex(status.contractAddress, 16, 12)} 📋
                 </span>
               ) : (
-                'Ã¢â‚¬â€'
+                ''
               )}
             </dd>
           </div>
           <div>
             <dt>Eligibility Verifications</dt>
-            <dd>{state ? formatCount(state.eligibilityCount) : 'Ã¢â‚¬â€'}</dd>
+            <dd>{state ? formatCount(state.eligibilityCount) : ''}</dd>
           </div>
         </dl>
         {balance && (
           <p className="balance-line">
-            Connected Wallet Address: <span className="mono">{shortHex(balance.address, 14, 10)}</span> Ã‚Â·{' '}
-            <strong>{Number(balance.tNight).toLocaleString()} tNIGHT</strong> Ã‚Â·{' '}
+            Connected Wallet Address: <span className="mono">{shortHex(balance.address, 14, 10)}</span> {' '}
+            <strong>{Number(balance.tNight).toLocaleString()} tNIGHT</strong> {' '}
             {Number(balance.dust).toLocaleString()} DUST
           </p>
         )}
@@ -1496,7 +1496,7 @@ function Overview({
                   onClick={() => onCopy(c.commitment, 'Commitment')}
                   title="Copy full commitment"
                 >
-                  Ã°Å¸â€œâ€¹
+                  📋
                 </button>
                 <span className="status-label">{c.status}</span>
               </li>
@@ -1508,7 +1508,7 @@ function Overview({
   )
 }
 
-// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ User Actions Tab Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+//  User Actions Tab 
 
 function UserActions({
   busy,
@@ -1543,7 +1543,7 @@ function UserActions({
         </p>
         {connectedWallet && (
           <p style={{ fontSize: '13px', color: 'var(--emerald)', marginBottom: '14px' }}>
-            Ã°Å¸â€™Â³ Connected as <strong>{connectedWallet.name}</strong> ({shortHex(connectedWallet.address, 8, 6)}). Request will be bound to your wallet commitment!
+            💳 Connected as <strong>{connectedWallet.name}</strong> ({shortHex(connectedWallet.address, 8, 6)}). Request will be bound to your wallet commitment!
           </p>
         )}
         <button
@@ -1554,10 +1554,10 @@ function UserActions({
           {busy === 'issueCredential' ? (
             <>
               <span className="spinner" style={{ width: 18, height: 18, borderWidth: 2 }} />
-              Submitting RequestÃ¢â‚¬Â¦
+              Submitting Request...
             </>
           ) : (
-            'Ã¢Å¾â€¢ Request Credential'
+            '+ Request Credential'
           )}
         </button>
       </section>
@@ -1584,14 +1584,14 @@ function UserActions({
                   onClick={() => onCopy(c.commitment, 'Commitment')}
                   title="Copy Commitment"
                 >
-                  Ã°Å¸â€œâ€¹
+                  📋
                 </button>
                 <button
                   className="btn btn-small btn-secondary"
                   onClick={() => onProve(c.commitment)}
                   disabled={busy !== null}
                 >
-                  {busy === 'proveEligibility' ? 'Proving ZKÃ¢â‚¬Â¦' : 'Ã¢Å¡Â¡ Prove Eligibility'}
+                  {busy === 'proveEligibility' ? 'Proving ZK...' : '⚡ Prove Eligibility'}
                 </button>
               </li>
             ))}
@@ -1601,7 +1601,7 @@ function UserActions({
         <div className="inline-form">
           <input
             type="text"
-            placeholder="Paste a 64-character hex commitment stringÃ¢â‚¬Â¦"
+            placeholder="Paste a 64-character hex commitment string..."
             value={commitmentInput}
             onChange={(e) => setCommitmentInput(e.target.value)}
             spellCheck={false}
@@ -1611,7 +1611,7 @@ function UserActions({
             onClick={onCustomProve}
             disabled={busy !== null}
           >
-            {busy === 'proveEligibility' ? 'ProvingÃ¢â‚¬Â¦' : 'Prove Custom'}
+            {busy === 'proveEligibility' ? 'Proving...' : 'Prove Custom'}
           </button>
         </div>
       </section>
@@ -1619,7 +1619,7 @@ function UserActions({
   )
 }
 
-// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Authority Tab Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+//  Authority Tab 
 
 function AuthorityActions({
   busy,
@@ -1658,14 +1658,14 @@ function AuthorityActions({
                   onClick={() => onCopy(c.commitment, 'Commitment')}
                   title="Copy Commitment"
                 >
-                  Ã°Å¸â€œâ€¹
+                  📋
                 </button>
                 <button
                   className="btn btn-small btn-approve"
                   onClick={() => onApprove(c.commitment)}
                   disabled={busy !== null}
                 >
-                  {busy === 'approveCredential' ? 'ApprovingÃ¢â‚¬Â¦' : 'Ã¢Å“â€œ Approve'}
+                  {busy === 'approveCredential' ? 'Approving...' : '✓ Approve'}
                 </button>
               </li>
             ))}
@@ -1691,14 +1691,14 @@ function AuthorityActions({
                   onClick={() => onCopy(c.commitment, 'Commitment')}
                   title="Copy Commitment"
                 >
-                  Ã°Å¸â€œâ€¹
+                  📋
                 </button>
                 <button
                   className="btn btn-small btn-danger"
                   onClick={() => onRevoke(c.commitment)}
                   disabled={busy !== null}
                 >
-                  {busy === 'revokeCredential' ? 'RevokingÃ¢â‚¬Â¦' : 'Ã°Å¸Å¡Â« Revoke'}
+                  {busy === 'revokeCredential' ? 'Revoking...' : '🚫 Revoke'}
                 </button>
               </li>
             ))}
@@ -1709,7 +1709,7 @@ function AuthorityActions({
   )
 }
 
-// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Audit History Tab Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+//  Audit History Tab 
 
 function AuditTab({
   history,
@@ -1731,7 +1731,7 @@ function AuditTab({
             {history.map((item) => (
               <li key={item.id} className="history-item">
                 <div className="history-header">
-                  <span className="history-action">Ã¢Å¡Â¡ {item.action}</span>
+                  <span className="history-action">⚡ {item.action}</span>
                   <span className="history-time">{new Date(item.timestamp).toLocaleTimeString()}</span>
                 </div>
                 <div className="history-body">{item.message}</div>
@@ -1744,7 +1744,7 @@ function AuditTab({
                       style={{ cursor: 'pointer', color: 'var(--accent-light)' }}
                       onClick={() => onCopy(item.txId, 'Tx ID')}
                     >
-                      {shortHex(item.txId, 10, 8)} Ã°Å¸â€œâ€¹
+                      {shortHex(item.txId, 10, 8)} 📋
                     </code>
                   </span>
                   {item.commitment && (
@@ -1755,7 +1755,7 @@ function AuditTab({
                         style={{ cursor: 'pointer', color: 'var(--accent-light)' }}
                         onClick={() => onCopy(item.commitment!, 'Commitment')}
                       >
-                        {shortHex(item.commitment, 8, 6)} Ã°Å¸â€œâ€¹
+                        {shortHex(item.commitment, 8, 6)} 📋
                       </code>
                     </span>
                   )}
