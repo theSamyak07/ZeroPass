@@ -16,7 +16,10 @@ build/
 .env.production.local
 
 # Contract artifacts
-contracts/managed/
+contracts/managed/*
+!contracts/managed/ZeroPass/
+!contracts/managed/ZeroPass/contract/
+!contracts/managed/ZeroPass/contract/**
 
 # Deployment info
 deployment.json
