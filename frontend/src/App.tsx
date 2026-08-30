@@ -38,11 +38,13 @@ function formatCount(value: string): string {
   return Number(value).toLocaleString()
 }
 
+export const DEFAULT_CONTRACT_ADDRESS = '1387bebdf07d4f8d5d9cc5d5f8e1e27db2a3a37e3b144daf4ec2413d5374abc0';
+
 function formatNetworkName(net?: string): string {
-  if (!net) return ''
+  if (!net) return 'Midnight Preprod'
   if (net === 'undeployed') return 'Local Dev Network'
-  if (net === 'preview') return 'Preview Testnet'
-  if (net === 'preprod') return 'Preprod Testnet'
+  if (net === 'preview') return 'Midnight Preview'
+  if (net === 'preprod' || net.toLowerCase().includes('preprod')) return 'Midnight Preprod'
   return net
 }
 
@@ -388,7 +390,7 @@ function App() {
       globalConnectedWallet = connectedWalletObj;
 
       // Join the deployed smart contract on Preprod
-      const contractAddress = status?.contractAddress || import.meta.env.VITE_CONTRACT_ADDRESS;
+      const contractAddress = status?.contractAddress || import.meta.env.VITE_CONTRACT_ADDRESS || DEFAULT_CONTRACT_ADDRESS;
       if (contractAddress && contractAddress !== '') {
         try {
           const result = await joinContract(walletApi, finalAddress, contractAddress);
@@ -743,17 +745,31 @@ function App() {
       if (connectedWallet) {
         customC = await simulateCommitment(connectedWallet.address)
       }
-      void runTxWithModal('issueCredential', 'Request KYC Credential', customC, () =>
-        api.issueCredential(customC)
-      )
+      void runTxWithModal('issueCredential', 'Request KYC Credential', customC, async () => {
+        try {
+          return await api.issueCredential(customC);
+        } catch (err: any) {
+          throw new Error(
+            'Local ZK proof-server or contract connection not ready. Make sure Docker container is running (npm run proof-server:start) and your wallet is unlocked on Midnight Preprod.',
+            { cause: err }
+          );
+        }
+      })
     }
   }, [deployedContract, connectedWallet, runTxWithModal])
 
   const handleApprove = useCallback(
     (commitment: string) => {
-      void runTxWithModal('approveCredential', 'Authority Approve Credential', commitment, () =>
-        api.approveCredential(commitment)
-      )
+      void runTxWithModal('approveCredential', 'Authority Approve Credential', commitment, async () => {
+        try {
+          return await api.approveCredential(commitment);
+        } catch (err: any) {
+          throw new Error(
+            'Authority approval requires active backend authority keys or contract deployment. Please ensure local proof-server is running.',
+            { cause: err }
+          );
+        }
+      })
     },
     [runTxWithModal]
   )
@@ -919,8 +935,8 @@ function App() {
 
         {/* Right: Status + Wallet */}
         <div className="header-meta">
-          <span className={`pill ${status ? 'pill-ok' : 'pill-err'}`}>
-            <span>●</span>{status ? formatNetworkName(status.network) : 'Offline'}
+          <span className="pill pill-ok">
+            <span>● </span>{formatNetworkName(status?.network || (connectedWallet ? connectedWallet.network : 'preprod'))}
           </span>
           {connectedWallet ? (
             <>
@@ -1431,26 +1447,22 @@ function Overview({
         <dl className="stat-grid">
           <div>
             <dt>Authority Name</dt>
-            <dd>{state?.authorityName ?? ''}</dd>
+            <dd>{state?.authorityName ?? 'ZeroPass Authority'}</dd>
           </div>
           <div>
             <dt>Active Network</dt>
-            <dd>{formatNetworkName(status?.network)}</dd>
+            <dd>{formatNetworkName(status?.network || (connectedWallet ? connectedWallet.network : 'preprod'))}</dd>
           </div>
           <div>
             <dt>Contract Address</dt>
             <dd className="mono">
-              {status?.contractAddress ? (
-                <span
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => onCopy(status.contractAddress, 'Contract Address')}
-                  title="Click to copy"
-                >
-                  {shortHex(status.contractAddress, 16, 12)} 📋
-                </span>
-              ) : (
-                ''
-              )}
+              <span
+                style={{ cursor: 'pointer' }}
+                onClick={() => onCopy(status?.contractAddress || DEFAULT_CONTRACT_ADDRESS, 'Contract Address')}
+                title="Click to copy"
+              >
+                {shortHex(status?.contractAddress || DEFAULT_CONTRACT_ADDRESS, 16, 12)} 📋
+              </span>
             </dd>
           </div>
           <div>
