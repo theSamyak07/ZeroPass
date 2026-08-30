@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, useRef } from 'react'
+﻿import { useCallback, useEffect, useMemo, useState, useRef } from 'react'
 import { Buffer } from 'buffer'
 import { findDeployedContract, type FoundContract } from '@midnight-ntwrk/midnight-js-contracts'
 import { CompiledContract } from '@midnight-ntwrk/midnight-js-protocol/compact-js'
@@ -26,12 +26,12 @@ import type {
 } from './types'
 import './App.css'
 
-// â”€â”€â”€ Small helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Small helpers Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 function shortHex(hex: string, head = 10, tail = 8): string {
-  if (!hex) return 'â€”'
+  if (!hex) return 'Ã¢â‚¬â€'
   if (hex.length <= head + tail) return hex
-  return `${hex.slice(0, head)}â€¦${hex.slice(-tail)}`
+  return `${hex.slice(0, head)}Ã¢â‚¬Â¦${hex.slice(-tail)}`
 }
 
 function formatCount(value: string): string {
@@ -39,7 +39,7 @@ function formatCount(value: string): string {
 }
 
 function formatNetworkName(net?: string): string {
-  if (!net) return 'â€”'
+  if (!net) return 'Ã¢â‚¬â€'
   if (net === 'undeployed') return 'Local Dev Network'
   if (net === 'preview') return 'Preview Testnet'
   if (net === 'preprod') return 'Preprod Testnet'
@@ -79,7 +79,7 @@ async function simulateCommitment(secret: string): Promise<string> {
   return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
 }
 
-// â”€â”€â”€ Toast notification state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Toast notification state Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 interface Toast {
   kind: 'success' | 'error' | 'info'
@@ -149,7 +149,7 @@ async function validateConnectedAPI(api: ConnectedAPI): Promise<boolean> {
   }
 }
 
-// â”€â”€â”€ Main Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Main Component Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 function App() {
   const [status, setStatus] = useState<ServerStatus | null>(null)
@@ -247,15 +247,8 @@ function App() {
       return;
     }
 
-    // Verify that the selected wallet is actually Lace (or has 'lace' in ID/name)
-    const initialWalletObj = window.midnight[walletId];
-    const isLace = walletId.toLowerCase().includes('lace') || (((initialWalletObj as any)?.name || '').toLowerCase().includes('lace'));
-    if (!isLace) {
-      if (!isAutoConnect) {
-        showToast('error', 'Only Lace Wallet is supported for this application.');
-      }
-      return;
-    }
+    // Accept any Midnight-compatible wallet (Lace, 1AM, etc.)
+    // No wallet filtering â€” all wallets in window.midnight are valid
 
     // For auto-connect only: if we already have an active verified connection, keep it
     if (isAutoConnect && globalConnectedAPI && globalConnectedWallet && globalConnectedWallet.id === walletId) {
@@ -910,45 +903,37 @@ function App() {
   return (
     <div className="app">
       <header className="app-header">
+        {/* Left: Brand */}
         <div className="brand">
           <div className="brand-mark">ðŸ›¡ï¸</div>
-          <div>
-            <h1>ZeroPass</h1>
-            <p className="tagline">Zero-Knowledge Compliance on Midnight Network</p>
-          </div>
+          <h1>ZeroPass</h1>
         </div>
+
+        {/* Center: Tabs */}
+        <nav className="header-tabs">
+          <button className={activeTab === 'overview' ? 'header-tab active' : 'header-tab'} onClick={() => setActiveTab('overview')}>Overview</button>
+          <button className={activeTab === 'user'     ? 'header-tab active' : 'header-tab'} onClick={() => setActiveTab('user')}>User</button>
+          <button className={activeTab === 'authority'? 'header-tab active' : 'header-tab'} onClick={() => setActiveTab('authority')}>Authority</button>
+          <button className={activeTab === 'audit'    ? 'header-tab active' : 'header-tab'} onClick={() => setActiveTab('audit')}>Audit ({history.length})</button>
+        </nav>
+
+        {/* Right: Status + Wallet */}
         <div className="header-meta">
           <span className={`pill ${status ? 'pill-ok' : 'pill-err'}`}>
-            {status ? `â— ${formatNetworkName(status.network)}` : 'â— offline'}
+            <span>â—</span>{status ? formatNetworkName(status.network) : 'Offline'}
           </span>
           {connectedWallet ? (
             <>
-              {contractInitFailed && (
-                <span className="pill pill-err">
-                  âš ï¸ Contract Init Failed
-                </span>
-              )}
+              {contractInitFailed && <span className="pill pill-err">âš  Contract Failed</span>}
               <span
                 className="pill pill-neutral"
-                style={{ cursor: 'pointer', borderColor: 'var(--emerald-border)' }}
+                style={{ cursor: 'pointer', borderColor: 'var(--emerald-border)', color: 'var(--emerald)' }}
                 onClick={() => setShowWalletSuccessPop(connectedWallet)}
-                title="Click to view connected wallet details"
+                title="View wallet details"
               >
-                ðŸ’³ {connectedWallet.name}: {shortHex(connectedWallet.address, 6, 4)}
+                {connectedWallet.name}: {shortHex(connectedWallet.address, 5, 4)}
               </span>
-              <span className="pill pill-neutral">
-                ðŸ’° {Number(connectedWallet.tNight).toLocaleString()} tNIGHT
-              </span>
-              <button 
-                className="btn btn-secondary btn-small" 
-                onClick={handleFaucetRequest}
-                disabled={isRequestingFaucet}
-              >
-                {isRequestingFaucet ? 'Funding...' : 'Request 20 tNIGHT Faucet'}
-              </button>
-              <button className="btn btn-secondary btn-small" onClick={disconnectWallet}>
-                Disconnect
-              </button>
+              <button className="btn btn-secondary btn-small" onClick={disconnectWallet}>Disconnect</button>
             </>
           ) : (
             <>
@@ -972,26 +957,12 @@ function App() {
       )}
 
       {contractInitFailed && (
-        <div className="contract-error-banner" style={{
-          margin: '20px auto',
-          maxWidth: '1200px',
-          padding: '16px 20px',
-          background: 'rgba(244, 63, 94, 0.18)',
-          border: '1px solid var(--rose-border)',
-          color: '#fda4af',
-          borderRadius: '12px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
-          boxShadow: 'var(--shadow)',
-          animation: 'toast-in 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-        }}>
-          <span style={{ fontSize: '20px' }}>âš ï¸</span>
+        <div className="contract-error-banner">
+          <span>Warning</span>
           <div>
-            <strong style={{ color: '#fda4af' }}>Wallet connected, contract initialization failed.</strong>
-            <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: 'var(--text-s)' }}>
-              We could not connect to the ZeroPass smart contract or configure the Midnight client providers. 
-              The application is running in read-only / offline mode. Make sure the local devnet or Preprod indexer & prover servers are running and healthy.
+            <strong>Wallet connected - contract initialization failed.</strong>
+            <p style={{ margin: '4px 0 0', fontSize: '12px', color: 'var(--text-s)' }}>
+              Could not join the ZeroPass smart contract. Running in read-only mode.
             </p>
           </div>
         </div>
@@ -1072,63 +1043,73 @@ function App() {
         </p>
       </footer>
 
-      {/* â”€â”€ Wallet Selector Modal â”€â”€ */}
+      {/* Ã¢â€â‚¬Ã¢â€â‚¬ Wallet Selector Modal Ã¢â€â‚¬Ã¢â€â‚¬ */}
+      {/* Wallet Selector Modal */}
       {showWalletModal && (
-        <div className="wallet-modal-overlay">
+        <div className="wallet-modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowWalletModal(false); }}>
           <div className="wallet-modal">
             <div className="wallet-modal-header">
-              <h2>Connect Midnight Wallet</h2>
-              <button className="close-btn" onClick={() => setShowWalletModal(false)}>âœ•</button>
+              <h2>Connect Wallet</h2>
+              <button className="close-btn" onClick={() => setShowWalletModal(false)}>✕</button>
             </div>
             <div className="wallet-modal-body">
+              <p className="wallet-list-sub">Select your Midnight wallet extension:</p>
               <div className="wallet-list">
-                <p className="wallet-list-sub">Select your Midnight wallet extension:</p>
-
-                {availableWallets
-                  .filter(w => w.id.toLowerCase().includes('lace') || w.name.toLowerCase().includes('lace'))
-                  .map((wallet) => (
+                {availableWallets.length > 0 ? availableWallets.map((wallet) => {
+                  const is1AM = wallet.id.toLowerCase().includes('1am') || wallet.name.toLowerCase().includes('1am');
+                  const isLace = wallet.id.toLowerCase().includes('lace') || wallet.name.toLowerCase().includes('lace');
+                  const walletIcon = is1AM ? '⚡' : isLace ? '🔵' : '💳';
+                  const walletDesc = is1AM
+                    ? 'Native Midnight wallet — lightweight & purpose-built'
+                    : isLace
+                    ? 'Official IOG wallet with Midnight support'
+                    : 'Midnight-compatible wallet extension';
+                  return (
                     <button
                       key={wallet.id}
-                      className="wallet-item-btn"
+                      className={`wallet-item-btn${is1AM ? ' wallet-recommended' : ''}`}
                       onClick={() => void connectWallet(wallet.id)}
                       disabled={isConnectingWallet}
                     >
-                      <span className="wallet-icon">ðŸ’³</span>
+                      <div className="wallet-icon-fallback">{walletIcon}</div>
                       <div className="wallet-info">
-                        <span className="wallet-name">{wallet.name}</span>
-                        <span className="wallet-meta">Official Midnight Extension</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span className="wallet-name">{wallet.name || wallet.id}</span>
+                          {is1AM && <span className="wallet-recommended-badge">Recommended</span>}
+                        </div>
+                        <span className="wallet-meta">{walletDesc}</span>
                       </div>
-                      <span className="wallet-arrow">âž”</span>
+                      <span className="wallet-arrow">→</span>
                     </button>
-                  ))}
-              </div>
-
-              {!availableWallets.some(w => w.id.toLowerCase().includes('lace') || w.name.toLowerCase().includes('lace')) && (
-                <div className="no-wallets-found" style={{ marginTop: '20px' }}>
-                  <p className="no-wallets-sub">
-                    Lace wallet extension not found in your browser.
-                  </p>
-                  <div className="download-links">
-                    <a href="https://lace.io" target="_blank" rel="noopener noreferrer" className="download-link">
-                      ðŸ“¥ Install Lace Wallet
-                    </a>
+                  );
+                }) : (
+                  <div className="no-wallets-found">
+                    <p className="no-wallets-sub">No Midnight wallet detected in your browser.</p>
+                    <div className="download-links">
+                      <a href="https://1am.xyz" target="_blank" rel="noopener noreferrer" className="download-link">
+                        ⚡ Get 1AM Wallet — Recommended
+                      </a>
+                      <a href="https://lace.io" target="_blank" rel="noopener noreferrer" className="download-link">
+                        🔵 Get Lace Wallet
+                      </a>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* â”€â”€ Wallet Connection Pop-up Message Modal â”€â”€ */}
+      {/* Ã¢â€â‚¬Ã¢â€â‚¬ Wallet Connection Pop-up Message Modal Ã¢â€â‚¬Ã¢â€â‚¬ */}
       {showWalletSuccessPop && (
         <div className="tx-modal-overlay">
           <div className="wallet-pop-card">
             <div className="wallet-pop-header">
-              <div className="wallet-pop-icon">ðŸ’³</div>
+              <div className="wallet-pop-icon">Ã°Å¸â€™Â³</div>
               <div>
                 <h3>Wallet Connected!</h3>
-                <p>â— Ready for Zero-Knowledge Transactions</p>
+                <p>Ã¢â€”Â Ready for Zero-Knowledge Transactions</p>
               </div>
             </div>
             <div className="wallet-pop-details">
@@ -1147,7 +1128,7 @@ function App() {
                   style={{ cursor: 'pointer', color: 'var(--accent-light)' }}
                   onClick={() => copyToClipboard(showWalletSuccessPop.address, 'Wallet Address')}
                 >
-                  {shortHex(showWalletSuccessPop.address, 10, 8)} ðŸ“‹
+                  {shortHex(showWalletSuccessPop.address, 10, 8)} Ã°Å¸â€œâ€¹
                 </span>
               </div>
               <div className="wallet-pop-row">
@@ -1167,23 +1148,23 @@ function App() {
             </div>
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
               <button className="btn btn-primary" onClick={() => setShowWalletSuccessPop(null)}>
-                âœ“ Continue to DApp
+                Ã¢Å“â€œ Continue to DApp
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* â”€â”€ Transaction & ZK Proof Processing Pop-up Modal â”€â”€ */}
+      {/* Ã¢â€â‚¬Ã¢â€â‚¬ Transaction & ZK Proof Processing Pop-up Modal Ã¢â€â‚¬Ã¢â€â‚¬ */}
       {txProgress && txProgress.open && (
         <div className="tx-modal-overlay">
           <div className="tx-modal-card">
             <div className="tx-modal-title-row">
               <h3>
-                <span>âš¡</span> {txProgress.title}
+                <span>Ã¢Å¡Â¡</span> {txProgress.title}
               </h3>
               {txProgress.step === 'done' || txProgress.step === 'error' ? (
-                <button className="close-btn" onClick={() => setTxProgress(null)}>âœ•</button>
+                <button className="close-btn" onClick={() => setTxProgress(null)}>Ã¢Å“â€¢</button>
               ) : null}
             </div>
 
@@ -1248,13 +1229,13 @@ function App() {
             {txProgress.step === 'done' && (
               <div className="wallet-pop-details" style={{ borderColor: 'var(--emerald-border)', background: 'rgba(16, 185, 129, 0.08)' }}>
                 <p style={{ margin: 0, fontWeight: 600, color: 'var(--emerald)', fontSize: 14 }}>
-                  âœ“ Transaction Confirmed on Midnight Ledger!
+                  Ã¢Å“â€œ Transaction Confirmed on Midnight Ledger!
                 </p>
                 {txProgress.txId && (
                   <div className="wallet-pop-row" style={{ marginTop: 8 }}>
                     <span className="wallet-pop-label">Tx ID:</span>
                     <span className="mono" style={{ cursor: 'pointer', color: 'var(--accent-light)' }} onClick={() => copyToClipboard(txProgress.txId!, 'Tx ID')}>
-                      {shortHex(txProgress.txId, 10, 8)} ðŸ“‹
+                      {shortHex(txProgress.txId, 10, 8)} Ã°Å¸â€œâ€¹
                     </span>
                   </div>
                 )}
@@ -1268,7 +1249,7 @@ function App() {
                   <div className="wallet-pop-row">
                     <span className="wallet-pop-label">Commitment:</span>
                     <span className="mono" style={{ cursor: 'pointer', color: 'var(--accent-light)' }} onClick={() => copyToClipboard(txProgress.commitment!, 'Commitment')}>
-                      {shortHex(txProgress.commitment, 10, 8)} ðŸ“‹
+                      {shortHex(txProgress.commitment, 10, 8)} Ã°Å¸â€œâ€¹
                     </span>
                   </div>
                 )}
@@ -1291,7 +1272,7 @@ function App() {
                   background: isWarning ? 'rgba(245, 158, 11, 0.08)' : 'rgba(244, 63, 94, 0.08)'
                 }}>
                   <p style={{ margin: 0, fontWeight: 600, color: isWarning ? '#f59e0b' : 'var(--rose)', fontSize: 14 }}>
-                    {isWarning ? 'âš ï¸' : 'âŒ'} {isWarning ? '' : 'Transaction Error: '}{txProgress.error}
+                    {isWarning ? 'Ã¢Å¡Â Ã¯Â¸Â' : 'Ã¢ÂÅ’'} {isWarning ? '' : 'Transaction Error: '}{txProgress.error}
                   </p>
                 </div>
               )
@@ -1305,7 +1286,7 @@ function App() {
               ) : (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: 'var(--accent-light)' }}>
                   <span className="spinner" style={{ width: 16, height: 16, borderWidth: 2 }} />
-                  <span>Processing ZK Transactionâ€¦</span>
+                  <span>Processing ZK TransactionÃ¢â‚¬Â¦</span>
                 </div>
               )}
             </div>
@@ -1316,7 +1297,7 @@ function App() {
   )
 }
 
-// â”€â”€â”€ Overview Tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Overview Tab Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 function Overview({
   status,
@@ -1383,7 +1364,7 @@ function Overview({
         </div>
 
         <div className="privacy-note">
-          <span className="privacy-icon">âš¡</span>
+          <span className="privacy-icon">Ã¢Å¡Â¡</span>
           <p>
             <strong>Interactive Privacy Visualizer:</strong> See how your local identity secret maps to a 32-byte on-chain commitment below.
           </p>
@@ -1431,7 +1412,7 @@ function Overview({
               onClick={() => onCopy(simHash, 'Simulated Commitment')}
               title="Copy Commitment"
             >
-              ðŸ“‹
+              Ã°Å¸â€œâ€¹
             </button>
           </div>
         </div>
@@ -1442,7 +1423,7 @@ function Overview({
         <dl className="stat-grid">
           <div>
             <dt>Authority Name</dt>
-            <dd>{state?.authorityName ?? 'â€”'}</dd>
+            <dd>{state?.authorityName ?? 'Ã¢â‚¬â€'}</dd>
           </div>
           <div>
             <dt>Active Network</dt>
@@ -1457,22 +1438,22 @@ function Overview({
                   onClick={() => onCopy(status.contractAddress, 'Contract Address')}
                   title="Click to copy"
                 >
-                  {shortHex(status.contractAddress, 16, 12)} ðŸ“‹
+                  {shortHex(status.contractAddress, 16, 12)} Ã°Å¸â€œâ€¹
                 </span>
               ) : (
-                'â€”'
+                'Ã¢â‚¬â€'
               )}
             </dd>
           </div>
           <div>
             <dt>Eligibility Verifications</dt>
-            <dd>{state ? formatCount(state.eligibilityCount) : 'â€”'}</dd>
+            <dd>{state ? formatCount(state.eligibilityCount) : 'Ã¢â‚¬â€'}</dd>
           </div>
         </dl>
         {balance && (
           <p className="balance-line">
-            Connected Wallet Address: <span className="mono">{shortHex(balance.address, 14, 10)}</span> Â·{' '}
-            <strong>{Number(balance.tNight).toLocaleString()} tNIGHT</strong> Â·{' '}
+            Connected Wallet Address: <span className="mono">{shortHex(balance.address, 14, 10)}</span> Ã‚Â·{' '}
+            <strong>{Number(balance.tNight).toLocaleString()} tNIGHT</strong> Ã‚Â·{' '}
             {Number(balance.dust).toLocaleString()} DUST
           </p>
         )}
@@ -1507,7 +1488,7 @@ function Overview({
                   onClick={() => onCopy(c.commitment, 'Commitment')}
                   title="Copy full commitment"
                 >
-                  ðŸ“‹
+                  Ã°Å¸â€œâ€¹
                 </button>
                 <span className="status-label">{c.status}</span>
               </li>
@@ -1519,7 +1500,7 @@ function Overview({
   )
 }
 
-// â”€â”€â”€ User Actions Tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ User Actions Tab Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 function UserActions({
   busy,
@@ -1554,7 +1535,7 @@ function UserActions({
         </p>
         {connectedWallet && (
           <p style={{ fontSize: '13px', color: 'var(--emerald)', marginBottom: '14px' }}>
-            ðŸ’³ Connected as <strong>{connectedWallet.name}</strong> ({shortHex(connectedWallet.address, 8, 6)}). Request will be bound to your wallet commitment!
+            Ã°Å¸â€™Â³ Connected as <strong>{connectedWallet.name}</strong> ({shortHex(connectedWallet.address, 8, 6)}). Request will be bound to your wallet commitment!
           </p>
         )}
         <button
@@ -1565,10 +1546,10 @@ function UserActions({
           {busy === 'issueCredential' ? (
             <>
               <span className="spinner" style={{ width: 18, height: 18, borderWidth: 2 }} />
-              Submitting Requestâ€¦
+              Submitting RequestÃ¢â‚¬Â¦
             </>
           ) : (
-            'âž• Request Credential'
+            'Ã¢Å¾â€¢ Request Credential'
           )}
         </button>
       </section>
@@ -1595,14 +1576,14 @@ function UserActions({
                   onClick={() => onCopy(c.commitment, 'Commitment')}
                   title="Copy Commitment"
                 >
-                  ðŸ“‹
+                  Ã°Å¸â€œâ€¹
                 </button>
                 <button
                   className="btn btn-small btn-secondary"
                   onClick={() => onProve(c.commitment)}
                   disabled={busy !== null}
                 >
-                  {busy === 'proveEligibility' ? 'Proving ZKâ€¦' : 'âš¡ Prove Eligibility'}
+                  {busy === 'proveEligibility' ? 'Proving ZKÃ¢â‚¬Â¦' : 'Ã¢Å¡Â¡ Prove Eligibility'}
                 </button>
               </li>
             ))}
@@ -1612,7 +1593,7 @@ function UserActions({
         <div className="inline-form">
           <input
             type="text"
-            placeholder="Paste a 64-character hex commitment stringâ€¦"
+            placeholder="Paste a 64-character hex commitment stringÃ¢â‚¬Â¦"
             value={commitmentInput}
             onChange={(e) => setCommitmentInput(e.target.value)}
             spellCheck={false}
@@ -1622,7 +1603,7 @@ function UserActions({
             onClick={onCustomProve}
             disabled={busy !== null}
           >
-            {busy === 'proveEligibility' ? 'Provingâ€¦' : 'Prove Custom'}
+            {busy === 'proveEligibility' ? 'ProvingÃ¢â‚¬Â¦' : 'Prove Custom'}
           </button>
         </div>
       </section>
@@ -1630,7 +1611,7 @@ function UserActions({
   )
 }
 
-// â”€â”€â”€ Authority Tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Authority Tab Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 function AuthorityActions({
   busy,
@@ -1669,14 +1650,14 @@ function AuthorityActions({
                   onClick={() => onCopy(c.commitment, 'Commitment')}
                   title="Copy Commitment"
                 >
-                  ðŸ“‹
+                  Ã°Å¸â€œâ€¹
                 </button>
                 <button
                   className="btn btn-small btn-approve"
                   onClick={() => onApprove(c.commitment)}
                   disabled={busy !== null}
                 >
-                  {busy === 'approveCredential' ? 'Approvingâ€¦' : 'âœ“ Approve'}
+                  {busy === 'approveCredential' ? 'ApprovingÃ¢â‚¬Â¦' : 'Ã¢Å“â€œ Approve'}
                 </button>
               </li>
             ))}
@@ -1702,14 +1683,14 @@ function AuthorityActions({
                   onClick={() => onCopy(c.commitment, 'Commitment')}
                   title="Copy Commitment"
                 >
-                  ðŸ“‹
+                  Ã°Å¸â€œâ€¹
                 </button>
                 <button
                   className="btn btn-small btn-danger"
                   onClick={() => onRevoke(c.commitment)}
                   disabled={busy !== null}
                 >
-                  {busy === 'revokeCredential' ? 'Revokingâ€¦' : 'ðŸš« Revoke'}
+                  {busy === 'revokeCredential' ? 'RevokingÃ¢â‚¬Â¦' : 'Ã°Å¸Å¡Â« Revoke'}
                 </button>
               </li>
             ))}
@@ -1720,7 +1701,7 @@ function AuthorityActions({
   )
 }
 
-// â”€â”€â”€ Audit History Tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Audit History Tab Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 function AuditTab({
   history,
@@ -1742,7 +1723,7 @@ function AuditTab({
             {history.map((item) => (
               <li key={item.id} className="history-item">
                 <div className="history-header">
-                  <span className="history-action">âš¡ {item.action}</span>
+                  <span className="history-action">Ã¢Å¡Â¡ {item.action}</span>
                   <span className="history-time">{new Date(item.timestamp).toLocaleTimeString()}</span>
                 </div>
                 <div className="history-body">{item.message}</div>
@@ -1755,7 +1736,7 @@ function AuditTab({
                       style={{ cursor: 'pointer', color: 'var(--accent-light)' }}
                       onClick={() => onCopy(item.txId, 'Tx ID')}
                     >
-                      {shortHex(item.txId, 10, 8)} ðŸ“‹
+                      {shortHex(item.txId, 10, 8)} Ã°Å¸â€œâ€¹
                     </code>
                   </span>
                   {item.commitment && (
@@ -1766,7 +1747,7 @@ function AuditTab({
                         style={{ cursor: 'pointer', color: 'var(--accent-light)' }}
                         onClick={() => onCopy(item.commitment!, 'Commitment')}
                       >
-                        {shortHex(item.commitment, 8, 6)} ðŸ“‹
+                        {shortHex(item.commitment, 8, 6)} Ã°Å¸â€œâ€¹
                       </code>
                     </span>
                   )}
