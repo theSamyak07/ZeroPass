@@ -1,0 +1,25 @@
+# ZeroPass CODEOWNERS
+#
+# These owners are automatically requested for review on every pull request
+# that touches the listed paths.
+
+# Default — everything
+* @theSamyak07
+
+# Smart contract source (privacy-critical — highest sensitivity)
+/contracts/*.compact @theSamyak07
+
+# Compiled contract artifacts
+/contracts/managed/ @theSamyak07
+
+# CI/CD and security workflows
+/.github/workflows/ @theSamyak07
+
+# GitHub community health files
+/.github/ISSUE_TEMPLATE/ @theSamyak07
+/.github/pull_request_template.md @theSamyak07
+
+# Documentation
+/docs/ @theSamyak07
+/README.md @theSamyak07
+/SECURITY.md @theSamyak07
