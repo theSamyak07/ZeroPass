@@ -1,8 +1,6 @@
 # 🔐 ZeroPass
 
-[![ZeroPass CI](https://github.com/theSamyak07/ZeroPass/actions/workflows/ci.yml/badge.svg)](https://github.com/theSamyak07/ZeroPass/actions/workflows/ci.yml)
-[![Contract Security Audit](https://github.com/theSamyak07/ZeroPass/actions/workflows/contract-audit.yml/badge.svg)](https://github.com/theSamyak07/ZeroPass/actions/workflows/contract-audit.yml)
-[![CD — Release](https://github.com/theSamyak07/ZeroPass/actions/workflows/cd.yml/badge.svg)](https://github.com/theSamyak07/ZeroPass/actions/workflows/cd.yml)
+
 [![Midnight Network](https://img.shields.io/badge/Midnight-Preprod-8b5cf6?logo=ethereum&logoColor=white)](https://midnight.network)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![X (Twitter)](https://img.shields.io/badge/X-@ZeroPass__00-black?logo=x&logoColor=white)](https://x.com/ZeroPass_00)
