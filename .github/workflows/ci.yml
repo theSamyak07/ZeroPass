@@ -2,19 +2,24 @@ name: ZeroPass CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
   pull_request:
     branches: [main]
 
-jobs:
-  test:
-    runs-on: ubuntu-latest
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
+jobs:
+  # ── 1. Lint & Type-check ─────────────────────────────────────────────────────
+  lint:
+    name: Lint & Type-check
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node.js 22
         uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -23,11 +28,208 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Compile Compact contract
-        run: npm run compile
-
-      - name: Run tests
-        run: npm test
-
-      - name: TypeScript build
+      - name: TypeScript type-check (no emit)
         run: npm run build
+
+  # ── 2. Smart Contract — Compile ───────────────────────────────────────────────
+  contract-compile:
+    name: Smart Contract — Compile
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Compact compiler
+        run: |
+          curl --proto '=https' --tlsv1.2 -LsSf \
+            https://github.com/midnightntwrk/compact/releases/latest/download/compact-installer.sh | sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Pin Compact version 0.31.1
+        run: compact update 0.31.1
+
+      - name: Compile shadow-kyc.compact
+        run: |
+          compact compile contracts/shadow-kyc.compact contracts/managed/ZeroPass
+          echo "✅ Compact contract compiled successfully"
+
+      - name: Verify compiled artifacts exist
+        run: |
+          test -d contracts/managed/ZeroPass/contract  || (echo "❌ contract/ dir missing" && exit 1)
+          test -d contracts/managed/ZeroPass/keys       || (echo "❌ keys/ dir missing"    && exit 1)
+          test -d contracts/managed/ZeroPass/zkir       || (echo "❌ zkir/ dir missing"    && exit 1)
+          echo "✅ All compiled artifacts present"
+
+      - name: Verify circuit count
+        run: |
+          CONTRACT_JS="contracts/managed/ZeroPass/contract/index.js"
+          test -f "$CONTRACT_JS" || (echo "❌ contract/index.js missing" && exit 1)
+          for circuit in issueCredential approveCredential proveEligibility revokeCredential; do
+            grep -q "$circuit" "$CONTRACT_JS" \
+              && echo "✅ circuit '$circuit' found" \
+              || (echo "❌ circuit '$circuit' NOT found in compiled output" && exit 1)
+          done
+
+      - name: Upload compiled contract artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: compiled-contract
+          path: contracts/managed/ZeroPass/
+          retention-days: 7
+
+  # ── 3. Smart Contract — Unit Tests ────────────────────────────────────────────
+  contract-test:
+    name: Smart Contract — Unit Tests
+    runs-on: ubuntu-latest
+    needs: contract-compile
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download compiled contract
+        uses: actions/download-artifact@v4
+        with:
+          name: compiled-contract
+          path: contracts/managed/ZeroPass/
+
+      - name: Run Vitest smart contract tests
+        run: npm test -- --reporter=verbose
+
+      - name: Assert all 14 tests passed
+        run: |
+          RESULT=$(npm test -- --reporter=json 2>/dev/null | tail -1)
+          PASSED=$(echo "$RESULT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['numPassedTests'])" 2>/dev/null || echo "0")
+          echo "Tests passed: $PASSED"
+          [ "$PASSED" -ge 14 ] && echo "✅ All 14+ tests passed" || (echo "❌ Expected ≥14 tests, got $PASSED" && exit 1)
+
+  # ── 4. Smart Contract — Security Lint ────────────────────────────────────────
+  contract-security:
+    name: Smart Contract — Security Lint
+    runs-on: ubuntu-latest
+    needs: contract-compile
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify privacy invariants in source
+        run: |
+          echo "Checking privacy contract invariants in shadow-kyc.compact ..."
+
+          CONTRACT="contracts/shadow-kyc.compact"
+
+          # 1. localSecret() must be a witness (private), not exported
+          grep -q "^witness localSecret" "$CONTRACT" \
+            && echo "✅ localSecret is a private witness" \
+            || (echo "❌ localSecret must be declared as a witness" && exit 1)
+
+          # 2. Every public disclose() call must be for state — not for the secret
+          # The secret is referenced as _secret but never passed to disclose()
+          python3 - <<'PYEOF'
+          with open("contracts/shadow-kyc.compact") as f:
+              src = f.read()
+          lines = src.splitlines()
+          bad = [l.strip() for l in lines if "disclose(_secret)" in l]
+          if bad:
+              print("❌ PRIVACY VIOLATION: _secret passed to disclose():", bad)
+              raise SystemExit(1)
+          print("✅ No raw _secret passed to disclose()")
+          PYEOF
+
+          # 3. Authority-only circuits must assert identity
+          for circuit in approveCredential revokeCredential; do
+            grep -A 10 "circuit $circuit" "$CONTRACT" | grep -q "assert(authority == pubKey" \
+              && echo "✅ $circuit: authority guard present" \
+              || (echo "❌ $circuit: missing authority guard" && exit 1)
+          done
+
+          # 4. proveEligibility must check both approved AND not revoked
+          grep -A 15 "circuit proveEligibility" "$CONTRACT" | grep -q "credentials.member" \
+            && echo "✅ proveEligibility checks credentials.member" \
+            || (echo "❌ proveEligibility missing credentials.member check" && exit 1)
+
+          grep -A 15 "circuit proveEligibility" "$CONTRACT" | grep -q "revokedCredentials.member" \
+            && echo "✅ proveEligibility checks revokedCredentials.member" \
+            || (echo "❌ proveEligibility missing revocation check" && exit 1)
+
+          echo ""
+          echo "✅ All privacy invariant checks passed"
+
+  # ── 5. Frontend Build ─────────────────────────────────────────────────────────
+  frontend-build:
+    name: Frontend — Build Check
+    runs-on: ubuntu-latest
+    needs: contract-compile
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install frontend dependencies
+        run: npm ci --prefix frontend
+
+      - name: Download compiled contract
+        uses: actions/download-artifact@v4
+        with:
+          name: compiled-contract
+          path: contracts/managed/ZeroPass/
+
+      - name: Build frontend
+        run: npm run frontend:build
+
+      - name: Upload frontend build
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist/
+          retention-days: 3
+
+  # ── 6. Summary Gate (all must pass) ──────────────────────────────────────────
+  ci-success:
+    name: CI — All Checks Passed
+    runs-on: ubuntu-latest
+    needs: [lint, contract-compile, contract-test, contract-security, frontend-build]
+    if: always()
+    steps:
+      - name: Check all jobs succeeded
+        run: |
+          if [[ "${{ needs.lint.result }}"              == "success" &&
+                "${{ needs.contract-compile.result }}"  == "success" &&
+                "${{ needs.contract-test.result }}"     == "success" &&
+                "${{ needs.contract-security.result }}" == "success" &&
+                "${{ needs.frontend-build.result }}"    == "success" ]]; then
+            echo "🎉 All CI checks passed — ZeroPass is green!"
+          else
+            echo "❌ One or more CI checks failed:"
+            echo "  lint:              ${{ needs.lint.result }}"
+            echo "  contract-compile:  ${{ needs.contract-compile.result }}"
+            echo "  contract-test:     ${{ needs.contract-test.result }}"
+            echo "  contract-security: ${{ needs.contract-security.result }}"
+            echo "  frontend-build:    ${{ needs.frontend-build.result }}"
+            exit 1
+          fi
