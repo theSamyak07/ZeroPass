@@ -13,19 +13,6 @@ ZeroPass is a decentralized **Confidential Credentials** dApp built on the **Mid
 
 ---
 
-## 🎬 Demo Video
-
-https://github.com/user-attachments/assets/demo
-
-> **Watch the full MVP walkthrough** — credential request, authority approval, ZK eligibility proof, and revocation — all without revealing private identity data.
-
-<video width="100%" controls>
-  <source src="docs/demo.mp4" type="video/mp4">
-  <a href="docs/demo.mp4">▶ Download / Watch Demo Video</a>
-</video>
-
----
-
 ## 🎯 What This Does
 
 ZeroPass provides privacy-preserving credential verification for compliance use-cases. A user receives a cryptographic credential commitment after authority approval and later proves eligibility using a zero-knowledge proof — verifying compliance while keeping the underlying secret and user identity **completely private**.
