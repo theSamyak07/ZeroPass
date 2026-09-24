@@ -1,6 +1,8 @@
-﻿# 🔐 ZeroPass
+# 🔐 ZeroPass
 
 [![ZeroPass CI](https://github.com/theSamyak07/ZeroPass/actions/workflows/ci.yml/badge.svg)](https://github.com/theSamyak07/ZeroPass/actions/workflows/ci.yml)
+[![Contract Security Audit](https://github.com/theSamyak07/ZeroPass/actions/workflows/contract-audit.yml/badge.svg)](https://github.com/theSamyak07/ZeroPass/actions/workflows/contract-audit.yml)
+[![CD — Release](https://github.com/theSamyak07/ZeroPass/actions/workflows/cd.yml/badge.svg)](https://github.com/theSamyak07/ZeroPass/actions/workflows/cd.yml)
 [![Midnight Network](https://img.shields.io/badge/Midnight-Preprod-8b5cf6?logo=ethereum&logoColor=white)](https://midnight.network)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![X (Twitter)](https://img.shields.io/badge/X-@ZeroPass__00-black?logo=x&logoColor=white)](https://x.com/ZeroPass_00)
@@ -10,6 +12,19 @@
 ZeroPass is a decentralized **Confidential Credentials** dApp built on the **Midnight Network** using **Compact Smart Contracts**, **React**, **TypeScript**, and the **Midnight.js SDK**. Users request identity credentials and prove regulatory eligibility **without ever revealing personal information** — the secret stays private; only its cryptographic commitment goes on-chain.
 
 🐦 Follow us on X: **[@ZeroPass_00](https://x.com/ZeroPass_00)**
+
+---
+
+## 🎬 Demo Video
+
+https://github.com/user-attachments/assets/demo
+
+> **Watch the full MVP walkthrough** — credential request, authority approval, ZK eligibility proof, and revocation — all without revealing private identity data.
+
+<video width="100%" controls>
+  <source src="docs/demo.mp4" type="video/mp4">
+  <a href="docs/demo.mp4">▶ Download / Watch Demo Video</a>
+</video>
 
 ---
 
@@ -30,7 +45,8 @@ ZeroPass provides privacy-preserving credential verification for compliance use-
 - 💳 Multi-wallet support — **1AM Wallet** (recommended) + Lace Wallet
 - ⚡ Node.js REST API backend + local ZK proof-server
 - 🧪 14/14 smart contract tests passing
-- 🔄 CI/CD pipeline on every push (GitHub Actions)
+- 🔄 3-workflow CI/CD pipeline on every push (GitHub Actions)
+- 🔐 Automated contract security audit on every contract change
 
 ---
 
@@ -42,6 +58,7 @@ ZeroPass provides privacy-preserving credential verification for compliance use-
 | **GitHub Repo** | [https://github.com/theSamyak07/ZeroPass](https://github.com/theSamyak07/ZeroPass) |
 | **X / Twitter** | [@ZeroPass_00](https://x.com/ZeroPass_00) |
 | **CI/CD** | [GitHub Actions — Passing](https://github.com/theSamyak07/ZeroPass/actions) |
+| **Demo Video** | [docs/demo.mp4](docs/demo.mp4) |
 
 ---
 
@@ -120,7 +137,48 @@ The commitment is computed inside the ZK circuit using Midnight's `persistentHas
 | Wallet | 1AM Wallet / Lace Wallet (Midnight dApp Connector API) |
 | ZK Proofs | Midnight Proof Server (local Docker, port 6300) |
 | Testing | Vitest (14 tests) |
-| CI/CD | GitHub Actions |
+| CI/CD | GitHub Actions (3 workflows) |
+
+---
+
+## ⚙️ CI/CD Pipeline
+
+ZeroPass has a **3-workflow CI/CD pipeline** covering every aspect of the codebase:
+
+### Workflow 1: `ci.yml` — Continuous Integration
+Runs on every push to `main` / `develop` and every PR:
+
+| Job | Description |
+|---|---|
+| `lint` | TypeScript type-check (`tsc --noEmit`) |
+| `contract-compile` | Install Compact 0.31.1, compile `shadow-kyc.compact`, verify artifacts |
+| `contract-test` | Run 14 Vitest tests against compiled contract (requires ≥14 passes) |
+| `contract-security` | Static analysis — privacy invariants, authority guards, revocation checks |
+| `frontend-build` | Build React + Vite frontend, upload dist artifact |
+| `ci-success` | Gate — all jobs must pass before merge |
+
+### Workflow 2: `contract-audit.yml` — Security Audit
+Triggered on every `contracts/` change and weekly (Monday 08:00 UTC):
+
+| Audit | Checks |
+|---|---|
+| **Privacy Model** | `localSecret` is witness, secret never in `disclose()`, sealed ledgers |
+| **Access Control** | Authority guards on `approve`/`revoke`, `issueCredential` open to all |
+| **Replay Prevention** | No duplicate pending, no re-issue, eligibility checks approved + not revoked |
+| **Complexity Analysis** | Documentation ratio ≥20%, circuit count ≥4 |
+
+### Workflow 3: `cd.yml` — Continuous Delivery
+Triggered on `v*.*.*` tags or manual dispatch:
+
+- Builds and packages release artifacts
+- Creates GitHub Release with auto-generated changelog
+- Deploys frontend to Vercel (production)
+
+**Badges:**
+
+[![ZeroPass CI](https://github.com/theSamyak07/ZeroPass/actions/workflows/ci.yml/badge.svg)](https://github.com/theSamyak07/ZeroPass/actions/workflows/ci.yml)
+[![Contract Security Audit](https://github.com/theSamyak07/ZeroPass/actions/workflows/contract-audit.yml/badge.svg)](https://github.com/theSamyak07/ZeroPass/actions/workflows/contract-audit.yml)
+[![CD — Release](https://github.com/theSamyak07/ZeroPass/actions/workflows/cd.yml/badge.svg)](https://github.com/theSamyak07/ZeroPass/actions/workflows/cd.yml)
 
 ---
 
@@ -248,21 +306,6 @@ Test Files  1 passed (1)
 
 ---
 
-## ⚙️ CI/CD
-
-ZeroPass runs GitHub Actions on every push to `main` and every pull request:
-
-1. Checkout repository
-2. Setup Node.js 22
-3. `npm ci` — install dependencies
-4. `npm run compile` — compile Compact smart contract
-5. `npm test` — run 14 Vitest tests
-6. `npm run build` — TypeScript build check
-
-[![ZeroPass CI](https://github.com/theSamyak07/ZeroPass/actions/workflows/ci.yml/badge.svg)](https://github.com/theSamyak07/ZeroPass/actions/workflows/ci.yml)
-
----
-
 ## 🌐 Deployment
 
 | Service | Status | URL |
@@ -282,6 +325,9 @@ ZeroPass/
 │   └── managed/ZeroPass/           # Compiled artifacts (CI-generated)
 │       ├── contract/               # JS circuit binaries
 │       └── keys/                   # Proving & verifying keys
+├── docs/
+│   ├── demo.mp4                    # MVP demo video
+│   └── screenshots/                # UI screenshots
 ├── frontend/                       # React + TypeScript + Vite frontend
 │   └── src/
 │       ├── App.tsx                 # Main UI — desktop layout, wallet modal
@@ -297,7 +343,10 @@ ZeroPass/
 │   └── wallet.ts                   # Wallet management
 ├── tests/
 │   └── shadow-kyc.test.ts          # 14 Vitest smart contract tests
-├── .github/workflows/ci.yml        # GitHub Actions CI/CD pipeline
+├── .github/workflows/
+│   ├── ci.yml                      # CI — lint, compile, test, security, build
+│   ├── cd.yml                      # CD — release packaging & Vercel deploy
+│   └── contract-audit.yml          # Security audit (privacy, access control)
 ├── compose.yml                     # Docker compose (proof-server)
 ├── PROPOSAL.md                     # Product proposal (Level 3)
 └── package.json
@@ -319,16 +368,20 @@ ZeroPass/
 - [x] Privacy model section in README
 - [x] PROPOSAL.md
 
-### Level 4 ✅ — Waxing Gibbous (MVP Live + Docs + X Profile)
+### Level 4 ✅ — Waxing Gibbous (MVP Live + Docs + CI/CD + X Profile)
 
-- [x] Working MVP live on Preprod (contract address above)
+- [x] Working MVP live on Preprod (`1387bebdf07d4f8d5d9cc5d5f8e1e27db2a3a37e3b144daf4ec2413d5374abc0`)
 - [x] Full documentation (README + setup + usage + privacy model)
-- [x] CI/CD pipeline running with passing runs
+- [x] **3-workflow CI/CD pipeline** running with passing runs:
+  - [x] `ci.yml` — lint, compile, test, security, frontend build
+  - [x] `contract-audit.yml` — privacy/access/replay security audit
+  - [x] `cd.yml` — release packaging & Vercel deployment
 - [x] Product X profile: [@ZeroPass_00](https://x.com/ZeroPass_00) — linked in README
 - [x] 15+ meaningful commits
 - [x] Public GitHub repository with complete documentation
 - [x] Live Preprod demo link + contract address
-- [x] CI/CD badge in README
+- [x] CI/CD badges in README (3 badges)
+- [x] **Demo video** embedded in README (`docs/demo.mp4`)
 
 ---
 
