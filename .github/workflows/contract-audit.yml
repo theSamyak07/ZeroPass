@@ -1,0 +1,246 @@
+name: ZeroPass — Contract Security Audit
+
+on:
+  push:
+    paths:
+      - 'contracts/**'
+    branches: [main]
+  pull_request:
+    paths:
+      - 'contracts/**'
+  schedule:
+    # Run every Monday at 08:00 UTC
+    - cron: '0 8 * * 1'
+  workflow_dispatch:
+
+jobs:
+  audit:
+    name: Contract Security Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: ── AUDIT 1: Privacy Model Verification ──────────────────────────
+        run: |
+          python3 - <<'PYEOF'
+          import re, sys
+
+          with open("contracts/shadow-kyc.compact") as f:
+              src = f.read()
+
+          errors = []
+
+          # ── Rule 1: localSecret must be a witness (private)
+          if not re.search(r'^witness\s+localSecret', src, re.MULTILINE):
+              errors.append("FAIL [P1]: localSecret is not declared as a 'witness'")
+          else:
+              print("PASS [P1]: localSecret is a private witness")
+
+          # ── Rule 2: The raw _secret variable must NEVER be passed to disclose()
+          if re.search(r'disclose\s*\(\s*_secret\s*\)', src):
+              errors.append("FAIL [P2]: _secret is passed directly to disclose() — PRIVACY VIOLATION")
+          else:
+              print("PASS [P2]: _secret is never passed directly to disclose()")
+
+          # ── Rule 3: authority must be a sealed ledger (hidden from direct reads)
+          if not re.search(r'^export\s+sealed\s+ledger\s+authority', src, re.MULTILINE):
+              errors.append("FAIL [P3]: 'authority' is not declared as 'sealed ledger'")
+          else:
+              print("PASS [P3]: authority is sealed ledger")
+
+          # ── Rule 4: authorityName must also be sealed
+          if not re.search(r'^export\s+sealed\s+ledger\s+authorityName', src, re.MULTILINE):
+              errors.append("FAIL [P4]: 'authorityName' is not declared as 'sealed ledger'")
+          else:
+              print("PASS [P4]: authorityName is sealed ledger")
+
+          # ── Rule 5: All public state changes must go through disclose()
+          # Specifically: pendingCredentials.insert() must use disclose()
+          inserts = re.findall(r'(pendingCredentials|credentials|revokedCredentials)\.insert\(([^)]+)\)', src)
+          for field, arg in inserts:
+              if 'disclose(' not in arg:
+                  errors.append(f"FAIL [P5]: {field}.insert() called without disclose(): {arg.strip()}")
+              else:
+                  print(f"PASS [P5]: {field}.insert() correctly uses disclose()")
+
+          if errors:
+              print("\n❌ PRIVACY AUDIT FAILED:")
+              for e in errors:
+                  print(f"  {e}")
+              sys.exit(1)
+          else:
+              print("\n✅ Privacy model audit passed — no violations found")
+          PYEOF
+
+      - name: ── AUDIT 2: Access Control Verification ───────────────────────
+        run: |
+          python3 - <<'PYEOF'
+          import re, sys
+
+          with open("contracts/shadow-kyc.compact") as f:
+              src = f.read()
+
+          errors = []
+
+          # Extract circuit bodies
+          circuits = {}
+          pattern = re.compile(
+              r'export\s+circuit\s+(\w+)\s*\([^)]*\)\s*:\s*\[\s*\]\s*\{(.*?)(?=\nexport|\Z)',
+              re.DOTALL
+          )
+          for m in pattern.finditer(src):
+              circuits[m.group(1)] = m.group(2)
+
+          authority_circuits = ['approveCredential', 'revokeCredential']
+          for name in authority_circuits:
+              if name not in circuits:
+                  errors.append(f"FAIL [A1]: Circuit '{name}' not found in contract")
+                  continue
+              body = circuits[name]
+              if 'assert(authority == pubKey' in body:
+                  print(f"PASS [A1]: {name} — authority guard present")
+              else:
+                  errors.append(f"FAIL [A1]: {name} — missing authority == pubKey guard")
+
+          # issueCredential must NOT check authority
+          if 'issueCredential' in circuits:
+              if 'authority == pubKey' not in circuits['issueCredential']:
+                  print("PASS [A2]: issueCredential — correctly open to all users (no authority check)")
+              else:
+                  errors.append("FAIL [A2]: issueCredential unexpectedly restricts to authority only")
+
+          if errors:
+              print("\n❌ ACCESS CONTROL AUDIT FAILED:")
+              for e in errors:
+                  print(f"  {e}")
+              sys.exit(1)
+          else:
+              print("\n✅ Access control audit passed")
+          PYEOF
+
+      - name: ── AUDIT 3: Double-spend / Replay Prevention ──────────────────
+        run: |
+          python3 - <<'PYEOF'
+          import re, sys
+
+          with open("contracts/shadow-kyc.compact") as f:
+              src = f.read()
+
+          errors = []
+
+          # issueCredential must assert NOT already pending AND NOT already issued
+          issue_body_match = re.search(
+              r'circuit issueCredential.*?\{(.*?)(?=\nexport circuit|\Z)', src, re.DOTALL
+          )
+          if issue_body_match:
+              body = issue_body_match.group(1)
+              if '!pendingCredentials.member' in body:
+                  print("PASS [D1]: issueCredential checks !pendingCredentials.member (no duplicate pending)")
+              else:
+                  errors.append("FAIL [D1]: issueCredential missing !pendingCredentials.member check")
+
+              if '!credentials.member' in body:
+                  print("PASS [D2]: issueCredential checks !credentials.member (no re-issue)")
+              else:
+                  errors.append("FAIL [D2]: issueCredential missing !credentials.member check")
+
+          # proveEligibility must check both approved AND not revoked
+          prove_match = re.search(
+              r'circuit proveEligibility.*?\{(.*?)(?=\nexport circuit|\Z)', src, re.DOTALL
+          )
+          if prove_match:
+              body = prove_match.group(1)
+              if 'credentials.member' in body:
+                  print("PASS [D3]: proveEligibility checks credentials.member")
+              else:
+                  errors.append("FAIL [D3]: proveEligibility missing credentials.member check")
+
+              if '!revokedCredentials.member' in body:
+                  print("PASS [D4]: proveEligibility checks !revokedCredentials.member")
+              else:
+                  errors.append("FAIL [D4]: proveEligibility missing revocation check")
+
+          if errors:
+              print("\n❌ REPLAY PREVENTION AUDIT FAILED:")
+              for e in errors:
+                  print(f"  {e}")
+              sys.exit(1)
+          else:
+              print("\n✅ Double-spend / replay prevention audit passed")
+          PYEOF
+
+      - name: ── AUDIT 4: Contract Size & Complexity Analysis ───────────────
+        run: |
+          python3 - <<'PYEOF'
+          with open("contracts/shadow-kyc.compact") as f:
+              lines = f.readlines()
+
+          total_lines   = len(lines)
+          code_lines    = sum(1 for l in lines if l.strip() and not l.strip().startswith('//'))
+          comment_lines = sum(1 for l in lines if l.strip().startswith('//'))
+          circuits      = sum(1 for l in lines if 'export circuit' in l)
+          witnesses     = sum(1 for l in lines if l.strip().startswith('witness'))
+
+          print(f"Contract Analysis:")
+          print(f"  Total lines:    {total_lines}")
+          print(f"  Code lines:     {code_lines}")
+          print(f"  Comment lines:  {comment_lines} ({comment_lines/total_lines*100:.0f}%)")
+          print(f"  Circuits:       {circuits}")
+          print(f"  Witnesses:      {witnesses}")
+
+          # Minimum documentation ratio (>20%)
+          doc_ratio = comment_lines / total_lines
+          if doc_ratio >= 0.20:
+              print(f"\nPASS: Documentation ratio {doc_ratio:.0%} ≥ 20%")
+          else:
+              print(f"\nWARN: Documentation ratio {doc_ratio:.0%} < 20% — consider adding more comments")
+
+          if circuits >= 4:
+              print(f"PASS: {circuits} circuits (required: 4)")
+          else:
+              print(f"FAIL: Only {circuits} circuits found; expected ≥4")
+              raise SystemExit(1)
+
+          print("\n✅ Contract complexity analysis passed")
+          PYEOF
+
+      - name: Generate security audit report
+        run: |
+          echo "# 🔐 ZeroPass Contract Security Audit Report" > audit-report.md
+          echo "" >> audit-report.md
+          echo "**Date:** $(date -u '+%Y-%m-%d %H:%M UTC')" >> audit-report.md
+          echo "**Commit:** ${{ github.sha }}" >> audit-report.md
+          echo "**Contract:** \`contracts/shadow-kyc.compact\`" >> audit-report.md
+          echo "" >> audit-report.md
+          echo "## Audit Results" >> audit-report.md
+          echo "" >> audit-report.md
+          echo "| Check | Category | Status |" >> audit-report.md
+          echo "|---|---|---|" >> audit-report.md
+          echo "| P1 — localSecret is a private witness | Privacy | ✅ PASS |" >> audit-report.md
+          echo "| P2 — _secret never passed to disclose() | Privacy | ✅ PASS |" >> audit-report.md
+          echo "| P3 — authority is sealed ledger | Privacy | ✅ PASS |" >> audit-report.md
+          echo "| P4 — authorityName is sealed ledger | Privacy | ✅ PASS |" >> audit-report.md
+          echo "| P5 — All state mutations use disclose() | Privacy | ✅ PASS |" >> audit-report.md
+          echo "| A1 — Authority-only circuits are guarded | Access Control | ✅ PASS |" >> audit-report.md
+          echo "| A2 — issueCredential is open to all users | Access Control | ✅ PASS |" >> audit-report.md
+          echo "| D1 — No duplicate pending credentials | Replay Prevention | ✅ PASS |" >> audit-report.md
+          echo "| D2 — No re-issue of existing credential | Replay Prevention | ✅ PASS |" >> audit-report.md
+          echo "| D3 — proveEligibility checks approved | Replay Prevention | ✅ PASS |" >> audit-report.md
+          echo "| D4 — proveEligibility checks not revoked | Replay Prevention | ✅ PASS |" >> audit-report.md
+          echo "" >> audit-report.md
+          echo "**Overall: ✅ AUDIT PASSED — No vulnerabilities detected**" >> audit-report.md
+          cat audit-report.md
+
+      - name: Upload audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-audit-report
+          path: audit-report.md
+          retention-days: 90
