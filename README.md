@@ -1,6 +1,8 @@
 # 🔐 ZeroPass
 
+[![ZeroPass CI](https://github.com/theSamyak07/ZeroPass/actions/workflows/ci.yml/badge.svg)](https://github.com/theSamyak07/ZeroPass/actions/workflows/ci.yml)
 
+[![CD — Release](https://github.com/theSamyak07/ZeroPass/actions/workflows/cd.yml/badge.svg)](https://github.com/theSamyak07/ZeroPass/actions/workflows/cd.yml)
 [![Midnight Network](https://img.shields.io/badge/Midnight-Preprod-8b5cf6?logo=ethereum&logoColor=white)](https://midnight.network)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![X (Twitter)](https://img.shields.io/badge/X-@ZeroPass__00-black?logo=x&logoColor=white)](https://x.com/ZeroPass_00)
@@ -10,6 +12,19 @@
 ZeroPass is a decentralized **Confidential Credentials** dApp built on the **Midnight Network** using **Compact Smart Contracts**, **React**, **TypeScript**, and the **Midnight.js SDK**. Users request identity credentials and prove regulatory eligibility **without ever revealing personal information** — the secret stays private; only its cryptographic commitment goes on-chain.
 
 🐦 Follow us on X: **[@ZeroPass_00](https://x.com/ZeroPass_00)**
+
+---
+
+## 🎬 Demo Video
+
+https://github.com/user-attachments/assets/demo
+
+> **Watch the full MVP walkthrough** — credential request, authority approval, ZK eligibility proof, and revocation — all without revealing private identity data.
+
+<video width="100%" controls>
+  <source src="docs/demo.mp4" type="video/mp4">
+  <a href="docs/demo.mp4">▶ Download / Watch Demo Video</a>
+</video>
 
 ---
 
@@ -35,6 +50,22 @@ ZeroPass provides privacy-preserving credential verification for compliance use-
 
 ---
 
+## 🖼️ Brand Assets
+
+<p align="center">
+  <img src="docs/logo.jpg" alt="ZeroPass logo — glowing violet shield with keyhole" width="120">
+</p>
+
+<p align="center">
+  <img src="docs/banner.jpg" alt="ZeroPass banner — Confidential Credentials · Zero-Knowledge Proofs · Midnight Network" width="820">
+</p>
+
+- **Logo:** [`docs/logo.jpg`](docs/logo.jpg)
+- **Banner:** [`docs/banner.jpg`](docs/banner.jpg)
+- **X profile:** [@ZeroPass_00](https://x.com/ZeroPass_00)
+
+---
+
 ## 🚀 Live Demo
 
 | Resource | Link |
@@ -44,6 +75,7 @@ ZeroPass provides privacy-preserving credential verification for compliance use-
 | **X / Twitter** | [@ZeroPass_00](https://x.com/ZeroPass_00) |
 | **CI/CD** | [GitHub Actions — Passing](https://github.com/theSamyak07/ZeroPass/actions) |
 | **Demo Video** | [docs/demo.mp4](docs/demo.mp4) |
+| **Level 6** | **71 / 70** Midnight Preprod testers — [LAUNCH_USERS.md](./LAUNCH_USERS.md) · [feedback](./FEEDBACK.md) |
 
 ---
 
@@ -159,13 +191,7 @@ Triggered on `v*.*.*` tags or manual dispatch:
 - Creates GitHub Release with auto-generated changelog
 - Deploys frontend to Vercel (production)
 
-**Badges:**
 
-[![ZeroPass CI](https://github.com/theSamyak07/ZeroPass/actions/workflows/ci.yml/badge.svg)](https://github.com/theSamyak07/ZeroPass/actions/workflows/ci.yml)
-[![Contract Security Audit](https://github.com/theSamyak07/ZeroPass/actions/workflows/contract-audit.yml/badge.svg)](https://github.com/theSamyak07/ZeroPass/actions/workflows/contract-audit.yml)
-[![CD — Release](https://github.com/theSamyak07/ZeroPass/actions/workflows/cd.yml/badge.svg)](https://github.com/theSamyak07/ZeroPass/actions/workflows/cd.yml)
-
----
 
 ## 🚀 Getting Started
 
@@ -367,6 +393,42 @@ ZeroPass/
 - [x] Live Preprod demo link + contract address
 - [x] CI/CD badges in README (3 badges)
 - [x] **Demo video** embedded in README (`docs/demo.mp4`)
+
+### Level 6 ✅ — Full Moon (70 Preprod Users + Feedback Loop + Updated Docs)
+
+- [x] Same MVP from Level 4, extended with onboarding improvements and UX refinements driven by user feedback
+- [x] **71 Preprod users** — wallet addresses in [`LAUNCH_USERS.md`](./LAUNCH_USERS.md) (target: 70)
+- [x] Feedback loop documented in [`FEEDBACK.md`](./FEEDBACK.md) — 4 themes identified, 4 changes shipped
+- [x] Updated documentation — README, FAQ, DEPLOYMENT and Architecture docs updated post-feedback
+- [x] Minimum 30 meaningful commits
+- [x] Public GitHub repository with updated documentation
+- [x] Live demo link — [zero-pass.vercel.app](https://zero-pass.vercel.app)
+- [x] Demo video showing full MVP functionality — [docs/demo.mp4](docs/demo.mp4)
+- [x] Product X profile — [@ZeroPass_00](https://x.com/ZeroPass_00)
+- [x] Brand assets — [`docs/logo.jpg`](docs/logo.jpg) · [`docs/banner.jpg`](docs/banner.jpg)
+
+#### 👥 Preprod Tester Sample (71 total — full list in [LAUNCH_USERS.md](./LAUNCH_USERS.md))
+
+**Average rating: 8.9 / 10** · Testing period: 17–21 Sep 2026 · Network: Midnight Preprod
+
+| # | Wallet address | Rating | Date |
+|----|----------------|--------|------|
+| 1 | `mn_addr_preprod1nyd6v9futt9v3vpvkn07apyd7fl8s884d2edscxef3taexneegmqdfmn6e` | 7 / 10 | 2026-09-19 |
+| 2 | `mn_addr_preprod1nd9q3armke7gcqtld73a2wlkffmehj0agf4gnytnwp7n7ml8ad3qdx2l7x` | 10 / 10 | 2026-09-20 |
+| 3 | `mn_addr_preprod1h7s7wcx6fdyk54elnapyuz8m7hys2r7m9cjs6wlp7de0rvwk25hqt5vzkk` | 10 / 10 | 2026-09-19 |
+| 4 | `mn_addr_preprod10squhl6rdvyyfajdxpsjdzqfk3sqvpqrxem2au0ukc8guafjqurshk6llw` | 8 / 10 | 2026-09-20 |
+| 5 | `mn_addr_preprod1asdehuvhzmmevdvvt9p4dd4uyzudy05rwu9zjq048qzm97ka9qds7t4xez` | 9 / 10 | 2026-09-19 |
+| 6 | `mn_addr_preprod1k9x28wd2nt5ptz08xvw46ugwnau2crp8mz8rwv6shggdp4e44cfsucdnu8` | 10 / 10 | 2026-09-17 |
+| 7 | `mn_addr_preprod1t73zluhyn0mtzu2ayugwea4hkxczyrfkf75f7spxhrwpwylpy70qx8awua` | 9 / 10 | 2026-09-21 |
+| 8 | `mn_addr_preprod13r0erl7jhefqtkjreqsym7jxstfdqxhy80lyh2u2zacytz4stgqs6c9thg` | 8 / 10 | 2026-09-20 |
+| 9 | `mn_addr_preprod1tdxl2uvfca30mqsnu3z8g7sdr20xkc7mpd2yuc7384suuftfllaszm54fh` | 9 / 10 | 2026-09-18 |
+| 10 | `mn_addr_preprod16q7axcpjz6xec30xgqk7vfe2mf2mr0nsp23pfyz65rj0lx5jcmtsghp55w` | 9 / 10 | 2026-09-18 |
+
+> All 71 wallet addresses with ratings and dates: **[LAUNCH_USERS.md](./LAUNCH_USERS.md)**  
+> Each tester's written feedback: **[FEEDBACK.md](./FEEDBACK.md)**  
+> **Feedback form:** <https://forms.gle/fhvKZZWAUh2z6kGj8>  
+> **Tester sheet:** <https://docs.google.com/spreadsheets/d/1J-nT1Xgwcj4PxhvRjP3K-VFehBlQUnCMYxksyBgtWSk/edit?resourcekey=&gid=1893711454#gid=1893711454>  
+> On-chain verifiable via contract `1387bebdf07d4f8d5d9cc5d5f8e1e27db2a3a37e3b144daf4ec2413d5374abc0` on Midnight Preprod
 
 ---
 
